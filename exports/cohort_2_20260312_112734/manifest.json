@@ -1,0 +1,22 @@
+{
+  "cohort_definition_id": 2,
+  "cohort_name": "",
+  "cohort_description": "",
+  "cdm_version": "5.4",
+  "export_timestamp": "2026-03-12T11:27:34.554188",
+  "person_count": 3,
+  "table_row_counts": {
+    "person": 3,
+    "observation_period": 3,
+    "visit_occurrence": 4,
+    "condition_occurrence": 56,
+    "measurement": 549,
+    "observation": 1402,
+    "concept": 190,
+    "concept_relationship": 79808
+  },
+  "vocabulary_concept_count": 190,
+  "source_schema": "public",
+  "total_tables": 8,
+  "total_rows": 82015
+}

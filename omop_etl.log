@@ -1,0 +1,231 @@
+2026-03-12 00:30:33,616 [INFO] core.id_generator: ID generators initialized from database
+2026-03-12 00:30:33,618 [INFO] core.cohort_builder: Ensured cohort table exists
+2026-03-12 00:30:33,624 [INFO] core.cohort_builder: Cohort 1 ('Age Cohort'): inserted 12 subject(s)
+2026-03-12 00:30:49,872 [INFO] core.id_generator: ID generators initialized from database
+2026-03-12 00:30:49,873 [INFO] core.cohort_builder: Ensured cohort table exists
+2026-03-12 00:30:49,875 [INFO] core.cohort_builder: Cohort 2 ('Elderly'): inserted 3 subject(s)
+2026-03-12 00:35:07,161 [INFO] loaders.cohort_extractor: Extracting cohort 1: 12 person(s)
+2026-03-12 00:35:07,163 [INFO] loaders.cohort_extractor:   person: 12 rows extracted
+2026-03-12 00:35:07,163 [INFO] loaders.cohort_extractor:   observation_period: 12 rows extracted
+2026-03-12 00:35:07,164 [INFO] loaders.cohort_extractor:   visit_occurrence: 14 rows extracted
+2026-03-12 00:35:07,166 [INFO] loaders.cohort_extractor:   condition_occurrence: 192 rows extracted
+2026-03-12 00:35:07,167 [INFO] loaders.cohort_extractor:   drug_exposure: 0 rows extracted
+2026-03-12 00:35:07,178 [INFO] loaders.cohort_extractor:   measurement: 1924 rows extracted
+2026-03-12 00:35:07,201 [INFO] loaders.cohort_extractor:   observation: 4874 rows extracted
+2026-03-12 00:35:07,203 [INFO] loaders.cohort_extractor:   procedure_occurrence: 0 rows extracted
+2026-03-12 00:35:07,206 [INFO] loaders.cohort_extractor:   device_exposure: 0 rows extracted
+2026-03-12 00:35:07,208 [INFO] loaders.cohort_extractor:   death: 0 rows extracted
+2026-03-12 00:35:07,209 [INFO] loaders.cohort_extractor:   note: 0 rows extracted
+2026-03-12 00:35:07,218 [INFO] loaders.cohort_extractor:   concept: 182 rows extracted
+2026-03-12 00:35:08,711 [INFO] loaders.cohort_extractor:   concept_relationship: 73202 rows extracted
+2026-03-12 00:35:08,713 [INFO] loaders.bundle_exporter:   Bundled person: 12 rows → clinical/person.csv
+2026-03-12 00:35:08,713 [INFO] loaders.bundle_exporter:   Bundled observation_period: 12 rows → clinical/observation_period.csv
+2026-03-12 00:35:08,714 [INFO] loaders.bundle_exporter:   Bundled visit_occurrence: 14 rows → clinical/visit_occurrence.csv
+2026-03-12 00:35:08,715 [INFO] loaders.bundle_exporter:   Bundled condition_occurrence: 192 rows → clinical/condition_occurrence.csv
+2026-03-12 00:35:08,731 [INFO] loaders.bundle_exporter:   Bundled measurement: 1924 rows → clinical/measurement.csv
+2026-03-12 00:35:08,777 [INFO] loaders.bundle_exporter:   Bundled observation: 4874 rows → clinical/observation.csv
+2026-03-12 00:35:08,778 [INFO] loaders.bundle_exporter:   Bundled concept: 182 rows → vocabulary/concept.csv
+2026-03-12 00:35:09,031 [INFO] loaders.bundle_exporter:   Bundled concept_relationship: 73202 rows → vocabulary/concept_relationship.csv
+2026-03-12 00:35:09,033 [INFO] loaders.bundle_exporter: Bundle created: ./exports/cohort_1_20260312_003508.zip (8 tables, 80,412 total rows)
+2026-03-12 01:07:26,275 [INFO] core.profiler: Profiling dataset: SANSCOG_ClinicalAssessment_IUDXTestData (2).csv
+2026-03-12 01:07:26,277 [INFO] core.profiler: Loaded 161 mapped field names from nurse_v10_snomed_mapping.csv
+2026-03-12 01:07:26,283 [INFO] core.profiler: Loaded 1822 mapped field names from clinical_v10_snomed_mapping.csv
+2026-03-12 01:07:26,286 [INFO] core.profiler: Dataset: 1702 columns, 14 rows
+2026-03-12 01:07:26,661 [INFO] core.profiler: Profile complete: person_id=hmse0:note6, gender=None, age=intro_header1:age, date_cols=5, groups=192
+2026-03-12 01:07:28,521 [INFO] pipeline: Connected to localhost:5432/omop
+2026-03-12 01:07:28,551 [INFO] core.id_generator: ID generators initialized from database
+2026-03-12 01:07:28,552 [INFO] pipeline: Step 1/5: Profiling source CSV...
+2026-03-12 01:07:28,552 [INFO] core.profiler: Profiling dataset: SANSCOG_ClinicalAssessment_IUDXTestData (2).csv
+2026-03-12 01:07:28,553 [INFO] core.profiler: Loaded 161 mapped field names from nurse_v10_snomed_mapping.csv
+2026-03-12 01:07:28,559 [INFO] core.profiler: Loaded 1822 mapped field names from clinical_v10_snomed_mapping.csv
+2026-03-12 01:07:28,562 [INFO] core.profiler: Dataset: 1702 columns, 14 rows
+2026-03-12 01:07:29,430 [INFO] core.profiler: Profile complete: person_id=hmse0:note6, gender=intro_header1:gender, age=intro_header1:age, date_cols=5, groups=192
+2026-03-12 01:07:29,430 [INFO] pipeline: Step 2/5: Loading SNOMED mappings...
+2026-03-12 01:07:29,430 [INFO] core.concept_resolver: Mapping file nurse_v10_snomed_mapping.csv: name_col='name', snomed_col='snomed'
+2026-03-12 01:07:29,431 [INFO] core.concept_resolver: Parsed 161 field→SNOMED mappings from nurse_v10_snomed_mapping.csv
+2026-03-12 01:07:29,431 [INFO] core.concept_resolver: Mapping file clinical_v10_snomed_mapping.csv: name_col='name', snomed_col='snomed'
+2026-03-12 01:07:29,439 [INFO] core.concept_resolver: Parsed 1682 field→SNOMED mappings from clinical_v10_snomed_mapping.csv
+2026-03-12 01:07:29,439 [INFO] pipeline: Loaded 1822 field→SNOMED mappings
+2026-03-12 01:07:29,439 [INFO] pipeline: Step 3/5: Classifying columns to OMOP domains...
+2026-03-12 01:07:30,020 [INFO] core.domain_classifier: Classification: 651 SNOMED-mapped, condition_occurrence=49, drug_exposure=18, measurement=183, observation=412, procedure_occurrence=2, skip=1038
+2026-03-12 01:07:30,020 [INFO] pipeline: Step 4/5: Resolving type concept IDs from DB...
+2026-03-12 01:07:30,060 [INFO] pipeline: Type concepts resolved from DB: {'visit_type': 0, 'obs_type': 32817, 'meas_type': 0, 'cond_type': 0, 'drug_type': 0, 'obs_period_type': 0, 'visit_concept': 9202, 'cond_status': 32867}
+2026-03-12 01:07:30,060 [INFO] pipeline: Step 5/5: Two-pass ETL (persons+visits → then events)...
+2026-03-12 01:07:30,066 [INFO] pipeline: Loaded 14 source rows into memory
+2026-03-12 01:07:30,072 [INFO] pipeline: Detected source visit ordinal column: intro_header1:visits
+2026-03-12 01:07:30,072 [INFO] pipeline: Pass 1: Writing persons and visit_occurrence...
+2026-03-12 01:07:30,121 [INFO] pipeline:   Committed 14 person records
+2026-03-12 01:07:30,152 [INFO] pipeline:   Committed 14 visit_occurrence records
+2026-03-12 01:07:30,152 [INFO] pipeline: Pass 2: Writing clinical events...
+2026-03-12 01:08:43,831 [INFO] pipeline: ETL complete. Processed 14 source rows.
+2026-03-12 01:17:46,031 [INFO] core.id_generator: ID generators initialized from database
+2026-03-12 01:17:46,033 [INFO] core.cohort_builder: Ensured cohort table exists
+2026-03-12 01:17:46,039 [INFO] core.cohort_builder: Cohort 1 ('Age Cohort'): inserted 12 subject(s)
+2026-03-12 01:18:26,350 [INFO] core.id_generator: ID generators initialized from database
+2026-03-12 01:18:26,352 [INFO] core.cohort_builder: Ensured cohort table exists
+2026-03-12 01:18:26,358 [INFO] core.cohort_builder: Cohort 2 ('Elderly'): inserted 3 subject(s)
+2026-03-12 01:18:58,836 [INFO] loaders.cohort_extractor: Extracting cohort 2: 3 person(s)
+2026-03-12 01:18:58,837 [INFO] loaders.cohort_extractor:   person: 3 rows extracted
+2026-03-12 01:18:58,838 [INFO] loaders.cohort_extractor:   observation_period: 3 rows extracted
+2026-03-12 01:18:58,838 [INFO] loaders.cohort_extractor:   visit_occurrence: 4 rows extracted
+2026-03-12 01:18:58,839 [INFO] loaders.cohort_extractor:   condition_occurrence: 56 rows extracted
+2026-03-12 01:18:58,840 [INFO] loaders.cohort_extractor:   drug_exposure: 0 rows extracted
+2026-03-12 01:18:58,843 [INFO] loaders.cohort_extractor:   measurement: 549 rows extracted
+2026-03-12 01:18:58,849 [INFO] loaders.cohort_extractor:   observation: 1402 rows extracted
+2026-03-12 01:18:58,850 [INFO] loaders.cohort_extractor:   procedure_occurrence: 0 rows extracted
+2026-03-12 01:18:58,851 [INFO] loaders.cohort_extractor:   device_exposure: 0 rows extracted
+2026-03-12 01:18:58,851 [INFO] loaders.cohort_extractor:   death: 0 rows extracted
+2026-03-12 01:18:58,852 [INFO] loaders.cohort_extractor:   note: 0 rows extracted
+2026-03-12 01:18:58,857 [INFO] loaders.cohort_extractor:   concept: 190 rows extracted
+2026-03-12 01:18:59,327 [INFO] loaders.cohort_extractor:   concept_relationship: 79808 rows extracted
+2026-03-12 01:18:59,329 [INFO] loaders.bundle_exporter:   Bundled person: 3 rows → clinical/person.csv
+2026-03-12 01:18:59,329 [INFO] loaders.bundle_exporter:   Bundled observation_period: 3 rows → clinical/observation_period.csv
+2026-03-12 01:18:59,329 [INFO] loaders.bundle_exporter:   Bundled visit_occurrence: 4 rows → clinical/visit_occurrence.csv
+2026-03-12 01:18:59,329 [INFO] loaders.bundle_exporter:   Bundled condition_occurrence: 56 rows → clinical/condition_occurrence.csv
+2026-03-12 01:18:59,334 [INFO] loaders.bundle_exporter:   Bundled measurement: 549 rows → clinical/measurement.csv
+2026-03-12 01:18:59,345 [INFO] loaders.bundle_exporter:   Bundled observation: 1402 rows → clinical/observation.csv
+2026-03-12 01:18:59,346 [INFO] loaders.bundle_exporter:   Bundled concept: 190 rows → vocabulary/concept.csv
+2026-03-12 01:18:59,580 [INFO] loaders.bundle_exporter:   Bundled concept_relationship: 79808 rows → vocabulary/concept_relationship.csv
+2026-03-12 01:18:59,582 [INFO] loaders.bundle_exporter: Bundle created: ./exports/cohort_2_20260312_011859.zip (8 tables, 82,015 total rows)
+2026-03-12 01:19:27,161 [INFO] loaders.cohort_extractor: Extracting cohort 1: 12 person(s)
+2026-03-12 01:19:27,162 [INFO] loaders.cohort_extractor:   person: 12 rows extracted
+2026-03-12 01:19:27,162 [INFO] loaders.cohort_extractor:   observation_period: 12 rows extracted
+2026-03-12 01:19:27,163 [INFO] loaders.cohort_extractor:   visit_occurrence: 14 rows extracted
+2026-03-12 01:19:27,164 [INFO] loaders.cohort_extractor:   condition_occurrence: 192 rows extracted
+2026-03-12 01:19:27,165 [INFO] loaders.cohort_extractor:   drug_exposure: 0 rows extracted
+2026-03-12 01:19:27,173 [INFO] loaders.cohort_extractor:   measurement: 1924 rows extracted
+2026-03-12 01:19:27,191 [INFO] loaders.cohort_extractor:   observation: 4874 rows extracted
+2026-03-12 01:19:27,192 [INFO] loaders.cohort_extractor:   procedure_occurrence: 0 rows extracted
+2026-03-12 01:19:27,192 [INFO] loaders.cohort_extractor:   device_exposure: 0 rows extracted
+2026-03-12 01:19:27,193 [INFO] loaders.cohort_extractor:   death: 0 rows extracted
+2026-03-12 01:19:27,193 [INFO] loaders.cohort_extractor:   note: 0 rows extracted
+2026-03-12 01:19:27,196 [INFO] loaders.cohort_extractor:   concept: 200 rows extracted
+2026-03-12 01:19:27,393 [INFO] loaders.cohort_extractor:   concept_relationship: 83934 rows extracted
+2026-03-12 01:19:27,394 [INFO] loaders.bundle_exporter:   Bundled person: 12 rows → clinical/person.csv
+2026-03-12 01:19:27,394 [INFO] loaders.bundle_exporter:   Bundled observation_period: 12 rows → clinical/observation_period.csv
+2026-03-12 01:19:27,394 [INFO] loaders.bundle_exporter:   Bundled visit_occurrence: 14 rows → clinical/visit_occurrence.csv
+2026-03-12 01:19:27,395 [INFO] loaders.bundle_exporter:   Bundled condition_occurrence: 192 rows → clinical/condition_occurrence.csv
+2026-03-12 01:19:27,412 [INFO] loaders.bundle_exporter:   Bundled measurement: 1924 rows → clinical/measurement.csv
+2026-03-12 01:19:27,451 [INFO] loaders.bundle_exporter:   Bundled observation: 4874 rows → clinical/observation.csv
+2026-03-12 01:19:27,452 [INFO] loaders.bundle_exporter:   Bundled concept: 200 rows → vocabulary/concept.csv
+2026-03-12 01:19:27,704 [INFO] loaders.bundle_exporter:   Bundled concept_relationship: 83934 rows → vocabulary/concept_relationship.csv
+2026-03-12 01:19:27,704 [INFO] loaders.bundle_exporter: Bundle created: ./exports/cohort_1_20260312_011927.zip (8 tables, 91,162 total rows)
+2026-03-12 11:26:47,262 [INFO] core.id_generator: ID generators initialized from database
+2026-03-12 11:26:47,263 [INFO] core.cohort_builder: Ensured cohort table exists
+2026-03-12 11:26:47,269 [INFO] core.cohort_builder: Cohort 3 ('Elderly'): inserted 3 subject(s)
+2026-03-12 11:27:34,022 [INFO] loaders.cohort_extractor: Extracting cohort 2: 3 person(s)
+2026-03-12 11:27:34,023 [INFO] loaders.cohort_extractor:   person: 3 rows extracted
+2026-03-12 11:27:34,023 [INFO] loaders.cohort_extractor:   observation_period: 3 rows extracted
+2026-03-12 11:27:34,024 [INFO] loaders.cohort_extractor:   visit_occurrence: 4 rows extracted
+2026-03-12 11:27:34,024 [INFO] loaders.cohort_extractor:   condition_occurrence: 56 rows extracted
+2026-03-12 11:27:34,025 [INFO] loaders.cohort_extractor:   drug_exposure: 0 rows extracted
+2026-03-12 11:27:34,028 [INFO] loaders.cohort_extractor:   measurement: 549 rows extracted
+2026-03-12 11:27:34,034 [INFO] loaders.cohort_extractor:   observation: 1402 rows extracted
+2026-03-12 11:27:34,035 [INFO] loaders.cohort_extractor:   procedure_occurrence: 0 rows extracted
+2026-03-12 11:27:34,035 [INFO] loaders.cohort_extractor:   device_exposure: 0 rows extracted
+2026-03-12 11:27:34,036 [INFO] loaders.cohort_extractor:   death: 0 rows extracted
+2026-03-12 11:27:34,036 [INFO] loaders.cohort_extractor:   note: 0 rows extracted
+2026-03-12 11:27:34,045 [INFO] loaders.cohort_extractor:   concept: 190 rows extracted
+2026-03-12 11:27:34,297 [INFO] loaders.cohort_extractor:   concept_relationship: 79808 rows extracted
+2026-03-12 11:27:34,298 [INFO] loaders.bundle_exporter:   Bundled person: 3 rows → clinical/person.csv
+2026-03-12 11:27:34,298 [INFO] loaders.bundle_exporter:   Bundled observation_period: 3 rows → clinical/observation_period.csv
+2026-03-12 11:27:34,298 [INFO] loaders.bundle_exporter:   Bundled visit_occurrence: 4 rows → clinical/visit_occurrence.csv
+2026-03-12 11:27:34,299 [INFO] loaders.bundle_exporter:   Bundled condition_occurrence: 56 rows → clinical/condition_occurrence.csv
+2026-03-12 11:27:34,303 [INFO] loaders.bundle_exporter:   Bundled measurement: 549 rows → clinical/measurement.csv
+2026-03-12 11:27:34,316 [INFO] loaders.bundle_exporter:   Bundled observation: 1402 rows → clinical/observation.csv
+2026-03-12 11:27:34,318 [INFO] loaders.bundle_exporter:   Bundled concept: 190 rows → vocabulary/concept.csv
+2026-03-12 11:27:34,554 [INFO] loaders.bundle_exporter:   Bundled concept_relationship: 79808 rows → vocabulary/concept_relationship.csv
+2026-03-12 11:27:34,555 [INFO] loaders.bundle_exporter: Bundle created: ./exports/cohort_2_20260312_112734.zip (8 tables, 82,015 total rows)
+2026-03-12 14:59:38,970 [INFO] core.profiler: Profiling dataset: SANSCOG_ClinicalAssessment_IUDXTestData (2).csv
+2026-03-12 14:59:38,975 [INFO] core.profiler: Loaded 161 mapped field names from nurse_v10_snomed_mapping.csv
+2026-03-12 14:59:38,987 [INFO] core.profiler: Loaded 1822 mapped field names from clinical_v10_snomed_mapping.csv
+2026-03-12 14:59:38,992 [INFO] core.profiler: Dataset: 1702 columns, 14 rows
+2026-03-12 14:59:39,368 [INFO] core.profiler: Profile complete: person_id=hmse0:note6, gender=None, age=intro_header1:age, date_cols=5, groups=192
+2026-03-12 14:59:40,845 [INFO] pipeline: Connected to localhost:5432/omop
+2026-03-12 14:59:40,870 [INFO] core.id_generator: ID generators initialized from database
+2026-03-12 14:59:40,871 [INFO] pipeline: Step 1/5: Profiling source CSV...
+2026-03-12 14:59:40,871 [INFO] core.profiler: Profiling dataset: SANSCOG_ClinicalAssessment_IUDXTestData (2).csv
+2026-03-12 14:59:40,871 [INFO] core.profiler: Loaded 161 mapped field names from nurse_v10_snomed_mapping.csv
+2026-03-12 14:59:40,875 [INFO] core.profiler: Loaded 1822 mapped field names from clinical_v10_snomed_mapping.csv
+2026-03-12 14:59:40,877 [INFO] core.profiler: Dataset: 1702 columns, 14 rows
+2026-03-12 14:59:41,777 [INFO] core.profiler: Profile complete: person_id=hmse0:note6, gender=intro_header1:gender, age=intro_header1:age, date_cols=5, groups=192
+2026-03-12 14:59:41,778 [INFO] pipeline: Step 2/5: Loading SNOMED mappings...
+2026-03-12 14:59:41,778 [INFO] core.concept_resolver: Mapping file nurse_v10_snomed_mapping.csv: name_col='name', snomed_col='snomed'
+2026-03-12 14:59:41,779 [INFO] core.concept_resolver: Parsed 161 field→SNOMED mappings from nurse_v10_snomed_mapping.csv
+2026-03-12 14:59:41,779 [INFO] core.concept_resolver: Mapping file clinical_v10_snomed_mapping.csv: name_col='name', snomed_col='snomed'
+2026-03-12 14:59:41,786 [INFO] core.concept_resolver: Parsed 1682 field→SNOMED mappings from clinical_v10_snomed_mapping.csv
+2026-03-12 14:59:41,786 [INFO] pipeline: Loaded 1822 field→SNOMED mappings
+2026-03-12 14:59:41,786 [INFO] pipeline: Step 3/5: Classifying columns to OMOP domains...
+2026-03-12 14:59:42,546 [INFO] core.domain_classifier: Classification: 651 SNOMED-mapped, condition_occurrence=49, drug_exposure=18, measurement=183, observation=412, procedure_occurrence=2, skip=1038
+2026-03-12 14:59:42,546 [INFO] pipeline: Step 4/5: Resolving type concept IDs from DB...
+2026-03-12 14:59:42,590 [INFO] pipeline: Type concepts resolved from DB: {'visit_type': 0, 'obs_type': 32817, 'meas_type': 0, 'cond_type': 0, 'drug_type': 0, 'obs_period_type': 0, 'visit_concept': 9202, 'cond_status': 32867}
+2026-03-12 14:59:42,590 [INFO] pipeline: Step 5/5: Two-pass ETL (persons+visits → then events)...
+2026-03-12 14:59:42,592 [INFO] pipeline: Loaded 14 source rows into memory
+2026-03-12 14:59:42,596 [INFO] pipeline: Detected source visit ordinal column: intro_header1:visits
+2026-03-12 14:59:42,596 [INFO] pipeline: Pass 1: Writing persons and visit_occurrence...
+2026-03-12 14:59:42,645 [INFO] pipeline:   Committed 14 person records
+2026-03-12 14:59:42,676 [INFO] pipeline:   Committed 14 visit_occurrence records
+2026-03-12 14:59:42,676 [INFO] pipeline: Pass 2: Writing clinical events...
+2026-03-12 15:00:59,642 [INFO] pipeline: ETL complete. Processed 14 source rows.
+2026-03-12 15:44:17,680 [INFO] core.profiler: Profiling dataset: SANSCOG_ClinicalAssessment_IUDXTestData (2).csv
+2026-03-12 15:44:17,682 [INFO] core.profiler: Loaded 161 mapped field names from nurse_v10_snomed_mapping.csv
+2026-03-12 15:44:17,689 [INFO] core.profiler: Loaded 1822 mapped field names from clinical_v10_snomed_mapping.csv
+2026-03-12 15:44:17,695 [INFO] core.profiler: Dataset: 1702 columns, 14 rows
+2026-03-12 15:44:18,101 [INFO] core.profiler: Profile complete: person_id=hmse0:note6, gender=None, age=intro_header1:age, date_cols=5, groups=192
+2026-03-12 15:44:18,213 [INFO] pipeline: Connected to localhost:5432/omop
+2026-03-12 15:44:18,242 [INFO] core.id_generator: ID generators initialized from database
+2026-03-12 15:44:18,242 [INFO] pipeline: Step 1/5: Profiling source CSV...
+2026-03-12 15:44:18,242 [INFO] core.profiler: Profiling dataset: SANSCOG_ClinicalAssessment_IUDXTestData (2).csv
+2026-03-12 15:44:18,243 [INFO] core.profiler: Loaded 161 mapped field names from nurse_v10_snomed_mapping.csv
+2026-03-12 15:44:18,247 [INFO] core.profiler: Loaded 1822 mapped field names from clinical_v10_snomed_mapping.csv
+2026-03-12 15:44:18,249 [INFO] core.profiler: Dataset: 1702 columns, 14 rows
+2026-03-12 15:44:19,097 [INFO] core.profiler: Profile complete: person_id=hmse0:note6, gender=intro_header1:gender, age=intro_header1:age, date_cols=5, groups=192
+2026-03-12 15:44:19,097 [INFO] pipeline: Step 2/5: Loading SNOMED mappings...
+2026-03-12 15:44:19,097 [INFO] core.concept_resolver: Mapping file nurse_v10_snomed_mapping.csv: name_col='name', snomed_col='snomed'
+2026-03-12 15:44:19,098 [INFO] core.concept_resolver: Parsed 161 field→SNOMED mappings from nurse_v10_snomed_mapping.csv
+2026-03-12 15:44:19,098 [INFO] core.concept_resolver: Mapping file clinical_v10_snomed_mapping.csv: name_col='name', snomed_col='snomed'
+2026-03-12 15:44:19,106 [INFO] core.concept_resolver: Parsed 1682 field→SNOMED mappings from clinical_v10_snomed_mapping.csv
+2026-03-12 15:44:19,106 [INFO] pipeline: Loaded 1822 field→SNOMED mappings
+2026-03-12 15:44:19,106 [INFO] pipeline: Step 3/5: Classifying columns to OMOP domains...
+2026-03-12 15:44:19,693 [INFO] core.domain_classifier: Classification: 651 SNOMED-mapped, condition_occurrence=49, drug_exposure=18, measurement=183, observation=412, procedure_occurrence=2, skip=1038
+2026-03-12 15:44:19,694 [INFO] pipeline: Step 4/5: Resolving type concept IDs from DB...
+2026-03-12 15:44:19,733 [INFO] pipeline: Type concepts resolved from DB: {'visit_type': 0, 'obs_type': 32817, 'meas_type': 0, 'cond_type': 0, 'drug_type': 0, 'obs_period_type': 0, 'visit_concept': 9202, 'cond_status': 32867}
+2026-03-12 15:44:19,733 [INFO] pipeline: Step 5/5: Two-pass ETL (persons+visits → then events)...
+2026-03-12 15:44:19,735 [INFO] pipeline: Loaded 14 source rows into memory
+2026-03-12 15:44:19,740 [INFO] pipeline: Detected source visit ordinal column: intro_header1:visits
+2026-03-12 15:44:19,740 [INFO] pipeline: Pass 1: Writing persons and visit_occurrence...
+2026-03-12 15:44:19,777 [INFO] pipeline:   Committed 14 person records
+2026-03-12 15:44:19,796 [INFO] pipeline:   Committed 14 visit_occurrence records
+2026-03-12 15:44:19,796 [INFO] pipeline: Pass 2: Writing clinical events...
+2026-03-12 15:45:36,353 [INFO] pipeline: ETL complete. Processed 14 source rows.
+2026-03-12 15:47:14,132 [INFO] core.profiler: Profiling dataset: SANSCOG_ClinicalAssessment_IUDXTestData (2).csv
+2026-03-12 15:47:14,135 [INFO] core.profiler: Loaded 161 mapped field names from nurse_v10_snomed_mapping.csv
+2026-03-12 15:47:14,140 [INFO] core.profiler: Loaded 1822 mapped field names from clinical_v10_snomed_mapping.csv
+2026-03-12 15:47:14,143 [INFO] core.profiler: Dataset: 1702 columns, 14 rows
+2026-03-12 15:47:14,519 [INFO] core.profiler: Profile complete: person_id=hmse0:note6, gender=None, age=intro_header1:age, date_cols=5, groups=192
+2026-03-12 15:47:16,121 [INFO] pipeline: Connected to localhost:5432/omop
+2026-03-12 15:47:16,153 [INFO] core.id_generator: ID generators initialized from database
+2026-03-12 15:47:16,153 [INFO] pipeline: Step 1/5: Profiling source CSV...
+2026-03-12 15:47:16,153 [INFO] core.profiler: Profiling dataset: SANSCOG_ClinicalAssessment_IUDXTestData (2).csv
+2026-03-12 15:47:16,154 [INFO] core.profiler: Loaded 161 mapped field names from nurse_v10_snomed_mapping.csv
+2026-03-12 15:47:16,158 [INFO] core.profiler: Loaded 1822 mapped field names from clinical_v10_snomed_mapping.csv
+2026-03-12 15:47:16,161 [INFO] core.profiler: Dataset: 1702 columns, 14 rows
+2026-03-12 15:47:16,998 [INFO] core.profiler: Profile complete: person_id=hmse0:note6, gender=intro_header1:gender, age=intro_header1:age, date_cols=5, groups=192
+2026-03-12 15:47:16,998 [INFO] pipeline: Step 2/5: Loading SNOMED mappings...
+2026-03-12 15:47:16,998 [INFO] core.concept_resolver: Mapping file nurse_v10_snomed_mapping.csv: name_col='name', snomed_col='snomed'
+2026-03-12 15:47:16,999 [INFO] core.concept_resolver: Parsed 161 field→SNOMED mappings from nurse_v10_snomed_mapping.csv
+2026-03-12 15:47:16,999 [INFO] core.concept_resolver: Mapping file clinical_v10_snomed_mapping.csv: name_col='name', snomed_col='snomed'
+2026-03-12 15:47:17,008 [INFO] core.concept_resolver: Parsed 1682 field→SNOMED mappings from clinical_v10_snomed_mapping.csv
+2026-03-12 15:47:17,009 [INFO] pipeline: Loaded 1822 field→SNOMED mappings
+2026-03-12 15:47:17,009 [INFO] pipeline: Step 3/5: Classifying columns to OMOP domains...
+2026-03-12 15:47:17,576 [INFO] core.domain_classifier: Classification: 651 SNOMED-mapped, condition_occurrence=49, drug_exposure=18, measurement=183, observation=412, procedure_occurrence=2, skip=1038
+2026-03-12 15:47:17,577 [INFO] pipeline: Step 4/5: Resolving type concept IDs from DB...
+2026-03-12 15:47:17,611 [INFO] pipeline: Type concepts resolved from DB: {'visit_type': 0, 'obs_type': 32817, 'meas_type': 0, 'cond_type': 0, 'drug_type': 0, 'obs_period_type': 0, 'visit_concept': 9202, 'cond_status': 32867}
+2026-03-12 15:47:17,611 [INFO] pipeline: Step 5/5: Two-pass ETL (persons+visits → then events)...
+2026-03-12 15:47:17,613 [INFO] pipeline: Loaded 14 source rows into memory
+2026-03-12 15:47:17,617 [INFO] pipeline: Detected source visit ordinal column: intro_header1:visits
+2026-03-12 15:47:17,617 [INFO] pipeline: Pass 1: Writing persons and visit_occurrence...
+2026-03-12 15:47:17,668 [INFO] pipeline:   Committed 14 person records
+2026-03-12 15:47:17,699 [INFO] pipeline:   Committed 14 visit_occurrence records
+2026-03-12 15:47:17,699 [INFO] pipeline: Pass 2: Writing clinical events...
+2026-03-12 15:48:35,795 [INFO] pipeline: ETL complete. Processed 14 source rows.

@@ -1,0 +1,21 @@
+vocabulary_download_v5_{c622e6c4-8d47-4fe9-967f-36bff11d22eb}_1772460435126/
+gender vocab/
+venv/
+__pycache__/
+*.pyc
+data/
+outputs/
+.env
+requirements.txt
+vocabulary_download_v5_*/
+*.zip
+vocabulary_download*/
+*.zip
+*.csv
+vocabulary_download*/
+*.zip
+*.csv
+vocabulary_download*/
+*.zipgit init
+git add .
+git commit -m "initial commit"

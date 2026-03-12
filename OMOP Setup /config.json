@@ -1,0 +1,42 @@
+{
+  "postgres": {
+    "container_name": "omop-postgres",
+    "user": "postgres",
+    "database": "omop"
+  },
+  "paths": {
+    "ddl_local": "/Users/suryanshshivaprasad/Documents/OMOP/CommonDataModel/inst/ddl/5.4/postgresql",
+    "ddl_container": "/omop_ddl",
+    "vocabulary_local": "/Users/suryanshshivaprasad/Documents/OMOP/CsV to OMOP/vocabulary_download_v5_{c622e6c4-8d47-4fe9-967f-36bff11d22eb}_1772460435126",
+    "vocabulary_container": "/vocabulary",
+    "gender_vocab_local": "/Users/suryanshshivaprasad/Documents/OMOP/CsV to OMOP/gender_vocabulary",
+    "gender_vocab_container": "/gender_vocabulary"
+  },
+  "ddl_files": [
+    "OMOPCDM_postgresql_5.4_ddl.sql",
+    "OMOPCDM_postgresql_5.4_primary_keys.sql",
+    "OMOPCDM_postgresql_5.4_constraints.sql",
+    "OMOPCDM_postgresql_5.4_indices.sql"
+  ],
+  "vocabulary_files": [
+    "VOCABULARY.csv",
+    "DOMAIN.csv",
+    "CONCEPT_CLASS.csv",
+    "RELATIONSHIP.csv",
+    "CONCEPT.csv",
+    "CONCEPT_SYNONYM.csv",
+    "CONCEPT_RELATIONSHIP.csv",
+    "CONCEPT_ANCESTOR.csv",
+    "DRUG_STRENGTH.csv"
+  ],
+  "gender_vocab_files": [
+    "gender_VOCABULARY.csv",
+    "gender_DOMAIN.csv",
+    "gender_CONCEPT_CLASS.csv",
+    "gender_RELATIONSHIP.csv",
+    "gender_CONCEPT.csv",
+    "gender_CONCEPT_RELATIONSHIP.csv",
+    "gender_CONCEPT_SYNONYM.csv",
+    "gender_CONCEPT_ANCESTOR.csv"
+  ]
+}
