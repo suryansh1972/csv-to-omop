@@ -15,15 +15,9 @@ import logging
 import os
 import zipfile
 from datetime import datetime, date
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Set
 
 logger = logging.getLogger(__name__)
-
-# Tables that belong under vocabulary/ instead of clinical/
-_VOCABULARY_TABLES = {"concept", "concept_relationship", "concept_ancestor",
-                      "concept_synonym", "vocabulary", "relationship",
-                      "concept_class", "domain", "drug_strength"}
-
 
 def _json_serial(obj: Any) -> str:
     """JSON serialiser for date/datetime objects."""
@@ -46,6 +40,11 @@ class BundleExporter:
             cohort_name="My Cohort",
         )
     """
+
+    def __init__(self, conn=None, schema: str = "public"):
+        self.conn = conn
+        self.schema = schema
+        self._person_scoped_tables: Optional[Set[str]] = None
 
     def export(
         self,
@@ -86,7 +85,7 @@ class BundleExporter:
                     continue
 
                 # Determine subdirectory
-                subdir = "vocabulary" if table_name in _VOCABULARY_TABLES else "clinical"
+                subdir = "clinical" if self._is_person_scoped_table(table_name, rows) else "vocabulary"
                 csv_path_in_zip = f"{subdir}/{table_name}.csv"
 
                 # Write CSV to zip
@@ -131,6 +130,41 @@ class BundleExporter:
     # ------------------------------------------------------------------
     # Internal helpers
     # ------------------------------------------------------------------
+
+    def _load_person_scoped_tables(self) -> Set[str]:
+        if not self.conn:
+            return set()
+        try:
+            cur = self.conn.cursor()
+            cur.execute(
+                """
+                SELECT DISTINCT table_name
+                FROM information_schema.columns
+                WHERE table_schema = %s
+                  AND column_name = 'person_id'
+                """,
+                (self.schema,),
+            )
+            tables = {row[0] for row in cur.fetchall()}
+            cur.close()
+            return tables
+        except Exception as exc:
+            try:
+                self.conn.rollback()
+            except Exception:
+                pass
+            logger.warning(f"Could not load person-scoped tables: {exc}")
+            return set()
+
+    def _is_person_scoped_table(self, table_name: str, rows: List[Dict[str, Any]]) -> bool:
+        if self.conn and self._person_scoped_tables is None:
+            self._person_scoped_tables = self._load_person_scoped_tables()
+        if self._person_scoped_tables:
+            return table_name in self._person_scoped_tables
+        if not rows:
+            return False
+        sample = rows[0]
+        return isinstance(sample, dict) and "person_id" in sample
 
     @staticmethod
     def _rows_to_csv(rows: List[Dict[str, Any]]) -> str:

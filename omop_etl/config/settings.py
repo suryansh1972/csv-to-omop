@@ -82,17 +82,26 @@ class ProfilerConfig:
     person_id_uniqueness_rate: float = 0.90
     person_id_max_avg_length:  float = 48.0
     person_id_id_like_rate:    float = 0.80
+    small_dataset_row_threshold: int = 25
+    person_id_min_score_small:   float = 3.0
+    person_id_uniqueness_rate_small: float = 0.80
+    person_id_id_like_rate_small:    float = 0.50
+    person_id_max_avg_length_small:  float = 80.0
 
     # Age column thresholds
     age_min_score:        float = 1.5
     age_min_value:        float = 0.0
     age_max_value:        float = 130.0
+    age_max_min_value:    float = 25.0
     age_median_min:       float = 18.0
     age_median_max:       float = 100.0
     age_integer_like_min: float = 0.80
 
     birth_date_min_score:      float = 1.0
     date_parse_rate_threshold: float = 0.80
+    schema_hint_min_date_rate: float = 0.20
+    schema_hint_min_numeric_rate: float = 0.50
+    schema_hint_min_boolean_rate: float = 0.50
 
     # dtype inference thresholds
     boolean_rate_threshold: float = 0.95

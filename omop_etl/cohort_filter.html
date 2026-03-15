@@ -1,0 +1,1094 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OMOP Cohort Filter</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:          #080c14;
+      --surface:     #0d1422;
+      --surface2:    #111b2e;
+      --border:      #1e2e48;
+      --border-glow: #1a4a8a;
+      --accent:      #2a7fff;
+      --accent2:     #00d4ff;
+      --accent-dim:  #1a4a7a;
+      --text:        #c8d8f0;
+      --text-dim:    #5a7090;
+      --text-bright: #e8f4ff;
+      --danger:      #ff4a6a;
+      --success:     #00e5a0;
+      --warning:     #ffaa2a;
+      --mono:        'Space Mono', monospace;
+      --sans:        'DM Sans', sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: 14px;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── Grid background ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(42,127,255,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(42,127,255,0.04) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── Glow orbs ── */
+    .orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(100px);
+      pointer-events: none;
+      z-index: 0;
+    }
+    .orb-1 { width: 500px; height: 500px; background: rgba(42,127,255,0.06); top: -150px; left: -100px; }
+    .orb-2 { width: 400px; height: 400px; background: rgba(0,212,255,0.04); bottom: 10%; right: -100px; }
+
+    /* ── Layout ── */
+    .app { position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; padding: 0 24px 80px; }
+
+    /* ── Header ── */
+    header {
+      padding: 36px 0 28px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 40px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .logo-mark {
+      width: 44px; height: 44px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: -0.5px;
+      flex-shrink: 0;
+      box-shadow: 0 0 20px rgba(42,127,255,0.3);
+    }
+
+    .header-text { flex: 1; }
+
+    .header-title {
+      font-family: var(--mono);
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-bright);
+      letter-spacing: 0.5px;
+    }
+
+    .header-sub {
+      font-size: 12px;
+      color: var(--text-dim);
+      margin-top: 3px;
+      font-weight: 300;
+      letter-spacing: 0.3px;
+    }
+
+    .header-badge {
+      font-family: var(--mono);
+      font-size: 10px;
+      padding: 4px 10px;
+      background: rgba(42,127,255,0.1);
+      border: 1px solid var(--border-glow);
+      border-radius: 20px;
+      color: var(--accent2);
+      letter-spacing: 1px;
+    }
+
+    /* ── Two-column layout ── */
+    .main-grid {
+      display: grid;
+      grid-template-columns: 420px 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+
+    @media (max-width: 800px) {
+      .main-grid { grid-template-columns: 1fr; }
+    }
+
+    /* ── Panel ── */
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .panel-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .panel-icon {
+      width: 28px; height: 28px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px;
+    }
+
+    .panel-title {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-dim);
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+
+    .panel-body { padding: 20px; }
+
+    /* ── Input group ── */
+    .input-group {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .concept-input {
+      flex: 1;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: var(--text-bright);
+      font-family: var(--mono);
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .concept-input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(42,127,255,0.12);
+    }
+
+    .concept-input::placeholder { color: var(--text-dim); font-family: var(--sans); font-size: 13px; }
+
+    /* ── Buttons ── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-family: var(--sans);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      outline: none;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+    }
+    .btn-primary:hover { background: #3a8fff; transform: translateY(-1px); box-shadow: 0 4px 16px rgba(42,127,255,0.3); }
+    .btn-primary:active { transform: translateY(0); }
+    .btn-primary:disabled { background: var(--accent-dim); cursor: not-allowed; transform: none; box-shadow: none; }
+
+    .btn-ghost {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+    .btn-ghost:hover { border-color: var(--accent); color: var(--accent2); }
+
+    .btn-execute {
+      width: 100%;
+      justify-content: center;
+      padding: 13px;
+      background: linear-gradient(135deg, var(--accent), #1a5ccc);
+      color: #fff;
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: 8px;
+      letter-spacing: 0.3px;
+      box-shadow: 0 4px 20px rgba(42,127,255,0.2);
+    }
+    .btn-execute:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(42,127,255,0.35); }
+    .btn-execute:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    .btn-download {
+      background: linear-gradient(135deg, #008855, #00c070);
+      color: #fff;
+      font-weight: 600;
+      padding: 12px 24px;
+      font-size: 14px;
+      box-shadow: 0 4px 16px rgba(0,192,112,0.25);
+    }
+    .btn-download:hover { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(0,192,112,0.4); }
+
+    /* ── Concept preview card ── */
+    .concept-preview {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 14px;
+      margin-bottom: 16px;
+      min-height: 58px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: border-color 0.2s;
+    }
+
+    .concept-preview.found { border-color: rgba(42,127,255,0.4); }
+    .concept-preview.error { border-color: rgba(255,74,106,0.4); }
+
+    .preview-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .preview-dot.idle   { background: var(--text-dim); }
+    .preview-dot.found  { background: var(--accent2); box-shadow: 0 0 6px var(--accent2); }
+    .preview-dot.error  { background: var(--danger); }
+    .preview-dot.loading {
+      background: var(--accent);
+      animation: pulse 1s infinite;
+    }
+
+    @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+    .preview-info { flex: 1; min-width: 0; }
+    .preview-name { color: var(--text-bright); font-weight: 500; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .preview-meta { font-family: var(--mono); font-size: 10px; color: var(--text-dim); margin-top: 2px; letter-spacing: 0.5px; }
+    .preview-idle { color: var(--text-dim); font-size: 13px; font-style: italic; }
+
+    /* ── Domain badge ── */
+    .domain-badge {
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      letter-spacing: 0.5px;
+      flex-shrink: 0;
+    }
+
+    /* Domain colors */
+    .domain-Condition   { background: rgba(255,74,106,0.15); color: #ff7a8a; border: 1px solid rgba(255,74,106,0.3); }
+    .domain-Measurement { background: rgba(0,212,255,0.15); color: #00d4ff; border: 1px solid rgba(0,212,255,0.3); }
+    .domain-Observation { background: rgba(170,100,255,0.15); color: #c080ff; border: 1px solid rgba(170,100,255,0.3); }
+    .domain-Drug        { background: rgba(255,170,42,0.15); color: #ffcc66; border: 1px solid rgba(255,170,42,0.3); }
+    .domain-Procedure   { background: rgba(0,229,160,0.15); color: #00e5a0; border: 1px solid rgba(0,229,160,0.3); }
+    .domain-Device      { background: rgba(100,150,255,0.15); color: #7ab0ff; border: 1px solid rgba(100,150,255,0.3); }
+    .domain-Visit       { background: rgba(255,120,60,0.15); color: #ff9060; border: 1px solid rgba(255,120,60,0.3); }
+    .domain-other       { background: rgba(90,112,144,0.2); color: var(--text-dim); border: 1px solid var(--border); }
+
+    /* ── Filters list ── */
+    .filters-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
+
+    .filter-chip {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      animation: slideIn 0.2s ease;
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(-6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .chip-id {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--accent2);
+      flex-shrink: 0;
+    }
+
+    .chip-name { flex: 1; font-size: 13px; color: var(--text); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    .chip-remove {
+      width: 22px; height: 22px;
+      background: none;
+      border: 1px solid transparent;
+      border-radius: 4px;
+      color: var(--text-dim);
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px;
+      flex-shrink: 0;
+      transition: all 0.15s;
+    }
+    .chip-remove:hover { border-color: var(--danger); color: var(--danger); }
+
+    .empty-state {
+      text-align: center;
+      padding: 24px 0;
+      color: var(--text-dim);
+      font-size: 13px;
+    }
+    .empty-icon { font-size: 28px; margin-bottom: 8px; opacity: 0.4; }
+
+    /* ── Divider ── */
+    .divider { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
+
+    /* ── Right panel: Results ── */
+    .right-panel { display: flex; flex-direction: column; gap: 24px; }
+
+    /* ── Status section ── */
+    .status-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 16px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--text-dim);
+      letter-spacing: 0.5px;
+      min-height: 44px;
+    }
+
+    .status-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--text-dim);
+      flex-shrink: 0;
+    }
+    .status-dot.running { background: var(--accent); animation: pulse 0.8s infinite; }
+    .status-dot.success { background: var(--success); }
+    .status-dot.error   { background: var(--danger); }
+
+    .status-text { flex: 1; }
+
+    /* ── Spinner ── */
+    .spinner {
+      width: 16px; height: 16px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      flex-shrink: 0;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Results card ── */
+    .results-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      display: none;
+    }
+    .results-card.visible { display: block; animation: fadeUp 0.3s ease; }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* ── Hero stat ── */
+    .hero-stat {
+      padding: 28px 24px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: flex-end;
+      gap: 24px;
+    }
+
+    .stat-big {
+      font-family: var(--mono);
+      font-size: 52px;
+      font-weight: 700;
+      color: var(--text-bright);
+      line-height: 1;
+      background: linear-gradient(135deg, var(--text-bright), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .stat-label {
+      font-size: 13px;
+      color: var(--text-dim);
+      margin-bottom: 6px;
+    }
+    .stat-sub { font-size: 12px; color: var(--text-dim); margin-top: 4px; font-family: var(--mono); }
+
+    /* ── Download area ── */
+    .download-area {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .file-info { display: flex; flex-direction: column; gap: 4px; }
+    .file-name { font-family: var(--mono); font-size: 12px; color: var(--accent2); }
+    .file-meta { font-size: 12px; color: var(--text-dim); }
+
+    /* ── Table counts ── */
+    .table-counts {
+      padding: 20px 24px;
+    }
+
+    .table-counts-title {
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text-dim);
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+
+    .counts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 8px;
+    }
+
+    .count-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 12px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      animation: fadeUp 0.3s ease both;
+    }
+
+    .count-name {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--text-dim);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      flex: 1;
+    }
+
+    .count-value {
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--accent2);
+      flex-shrink: 0;
+      margin-left: 8px;
+    }
+
+    /* ── Error card ── */
+    .error-card {
+      background: rgba(255,74,106,0.06);
+      border: 1px solid rgba(255,74,106,0.25);
+      border-radius: 10px;
+      padding: 16px 20px;
+      display: none;
+    }
+    .error-card.visible { display: block; animation: fadeUp 0.25s ease; }
+    .error-title { font-family: var(--mono); font-size: 11px; font-weight: 700; color: var(--danger); letter-spacing: 1px; margin-bottom: 6px; }
+    .error-body  { font-size: 13px; color: #ff8090; line-height: 1.5; }
+
+    /* ── No results ── */
+    .no-results {
+      text-align: center;
+      padding: 48px 24px;
+      display: none;
+    }
+    .no-results.visible { display: block; animation: fadeUp 0.25s ease; }
+    .no-results-icon { font-size: 40px; opacity: 0.3; margin-bottom: 12px; }
+    .no-results-text { color: var(--text-dim); font-size: 14px; }
+
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--accent-dim); }
+
+    /* ── Tooltip ── */
+    [data-tip] { position: relative; cursor: help; }
+    [data-tip]:hover::after {
+      content: attr(data-tip);
+      position: absolute;
+      bottom: calc(100% + 6px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: #1a2540;
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-size: 11px;
+      padding: 5px 10px;
+      border-radius: 5px;
+      white-space: nowrap;
+      z-index: 100;
+    }
+
+    /* ── Notice line ── */
+    .notice {
+      font-size: 11px;
+      color: var(--text-dim);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 10px;
+    }
+    .notice::before { content: ''; display: block; width: 4px; height: 4px; border-radius: 50%; background: var(--accent-dim); flex-shrink: 0; }
+
+    /* ── Search results ── */
+    .search-results {
+      margin: 10px 0 16px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      display: none;
+    }
+    .search-title {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 1px;
+      color: var(--text-dim);
+      margin-bottom: 8px;
+      text-transform: uppercase;
+    }
+    .search-list { display: flex; flex-direction: column; gap: 6px; max-height: 180px; overflow: auto; }
+    .search-item {
+      padding: 8px 10px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: rgba(8,12,20,0.35);
+      cursor: pointer;
+      transition: border-color 0.15s, transform 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .search-item:active { transform: translateY(0); }
+    .search-item:hover { border-color: var(--accent); transform: translateY(-1px); }
+    .search-name { font-size: 12px; color: var(--text-bright); flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .search-meta { font-family: var(--mono); font-size: 10px; color: var(--text-dim); }
+
+    /* ── Search visibility ── */
+    .search-results {
+      position: relative;
+      z-index: 2;
+    }
+  </style>
+</head>
+<body>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+
+  <div class="app">
+    <header>
+      <div class="logo-mark">CDM</div>
+      <div class="header-text">
+        <div class="header-title">OMOP Cohort Filter</div>
+        <div class="header-sub">Concept-ID driven patient cohort extraction → DuckDB</div>
+      </div>
+      <div class="header-badge">CDM 5.4</div>
+    </header>
+
+    <div class="main-grid">
+
+      <!-- ── LEFT: Filter Panel ── -->
+      <div>
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-icon">⚗</div>
+            <div class="panel-title">Concept Filters</div>
+          </div>
+          <div class="panel-body">
+
+            <!-- Input -->
+            <div class="input-group">
+              <input
+                id="conceptInput"
+                class="concept-input"
+                type="text"
+                placeholder="Enter Concept ID or name (e.g. 320128 or Fever)"
+                autocomplete="off"
+                spellcheck="false"
+              />
+              <button class="btn btn-ghost" id="lookupBtn" onclick="lookupConcept()">Search</button>
+            </div>
+
+            <!-- Preview card -->
+            <div class="concept-preview" id="previewCard">
+              <div class="preview-dot idle" id="previewDot"></div>
+              <span class="preview-idle" id="previewIdle">Enter a concept ID or name to preview</span>
+              <div id="previewContent" style="display:none; flex:1; min-width:0; display:flex; align-items:center; gap:10px;">
+                <div class="preview-info">
+                  <div class="preview-name" id="previewName"></div>
+                  <div class="preview-meta" id="previewMeta"></div>
+                </div>
+                <span class="domain-badge" id="previewDomain"></span>
+              </div>
+            </div>
+
+            <!-- Search results (for name-based queries) -->
+            <div class="search-results" id="searchResults">
+              <div class="search-title">Matches</div>
+              <div class="search-list" id="searchList"></div>
+            </div>
+
+            <!-- Add filter button -->
+            <button class="btn btn-primary" id="addBtn" onclick="addFilter()" disabled style="width:100%; justify-content:center; margin-bottom:20px;">
+              <span>＋</span> Add Filter
+            </button>
+
+            <hr class="divider" />
+
+            <!-- Active filters -->
+            <div id="filtersList">
+              <div class="empty-state" id="emptyState">
+                <div class="empty-icon">◈</div>
+                No concept filters added yet
+              </div>
+            </div>
+
+
+            <hr class="divider" />
+
+            <!-- Execute -->
+            <button class="btn btn-execute" id="executeBtn" onclick="executeFilter()" disabled>
+              <span id="executeBtnIcon">▶</span>
+              <span id="executeBtnLabel">Execute Filter & Export DuckDB</span>
+            </button>
+
+            <div class="notice">
+              Matches patients across all OMOP person-scoped tables
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── RIGHT: Results ── -->
+      <div class="right-panel">
+
+        <!-- Status bar -->
+        <div class="status-bar" id="statusBar">
+          <div class="status-dot" id="statusDot"></div>
+          <span class="status-text" id="statusText">Idle — add concept filters and execute</span>
+        </div>
+
+        <!-- Error card -->
+        <div class="error-card" id="errorCard">
+          <div class="error-title">⚠ ERROR</div>
+          <div class="error-body" id="errorBody"></div>
+        </div>
+
+        <!-- No results -->
+        <div class="no-results" id="noResults">
+          <div class="no-results-icon">∅</div>
+          <div class="no-results-text">No patients matched the selected concept filters.</div>
+        </div>
+
+        <!-- Results card -->
+        <div class="results-card" id="resultsCard">
+
+          <!-- Hero stat: person count -->
+          <div class="hero-stat">
+            <div>
+              <div class="stat-label">Matching Patients</div>
+              <div class="stat-big" id="personCount">0</div>
+              <div class="stat-sub" id="totalRows">— total rows extracted</div>
+            </div>
+          </div>
+
+          <!-- Download -->
+          <div class="download-area">
+            <div class="file-info">
+              <div class="file-name" id="fileName">—</div>
+              <div class="file-meta">DuckDB file · OMOP CDM 5.4 schema · ready to download</div>
+            </div>
+            <button class="btn btn-download" id="downloadBtn" onclick="downloadFile()">
+              ↓ Download .duckdb
+            </button>
+          </div>
+
+          <!-- Table counts -->
+          <div class="table-counts">
+            <div class="table-counts-title">Extracted Tables</div>
+            <div class="counts-grid" id="countsGrid"></div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ── API base URL ──
+    // Works when:
+    // - served by Flask on :5050 (same-origin)
+    // - opened as file://
+    // - served by a dev server like Live Server on :5500
+    const API_BASE = (location.protocol === 'file:' || location.port !== '5050')
+      ? 'http://localhost:5050'
+      : ''; // same-origin when served by Flask
+
+    // ── State ──
+    const filters  = [];        // { concept_id, concept_name, domain_id, vocab_id }
+    let currentPreview = null;  // concept object from lookup
+    let lastResult = null;      // API result
+    let searchResults = [];
+
+    // ── Input: lookup on Enter ──
+    document.getElementById('conceptInput').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') lookupConcept();
+    });
+
+    document.getElementById('conceptInput').addEventListener('input', () => {
+      resetPreview();
+    });
+
+    function domainClass(domain) {
+      const known = new Set(['Condition','Measurement','Observation','Drug','Procedure','Device','Visit','Specimen','Death','Note']);
+      return known.has(domain) ? `domain-${domain}` : 'domain-other';
+    }
+
+    // ── Concept lookup ──
+    async function lookupConcept() {
+      const val = document.getElementById('conceptInput').value.trim();
+      if (!val) {
+        showPreviewError('Please enter a concept ID or name');
+        return;
+      }
+
+      setPreviewLoading();
+
+      // ID path
+      if (/^\d+$/.test(val)) {
+        try {
+          const res = await fetch(`${API_BASE}/api/concept-lookup?concept_id=${encodeURIComponent(val)}`);
+          const data = await res.json();
+
+          if (!res.ok) {
+            showPreviewError(data.error || `Concept ${val} not found`);
+            return;
+          }
+
+          currentPreview = data;
+          showPreviewFound(data);
+          clearSearchResults();
+          document.getElementById('addBtn').disabled = false;
+          return;
+        } catch (err) {
+          showPreviewError('Network error — is the API server running?');
+          return;
+        }
+      }
+
+      // Name path
+      try {
+        const res = await fetch(`${API_BASE}/api/concept-search?q=${encodeURIComponent(val)}&limit=20`);
+        const data = await res.json();
+
+        if (!res.ok) {
+          showPreviewError(data.error || 'Search failed');
+          return;
+        }
+
+        searchResults = data.results || [];
+        if (searchResults.length === 0) {
+          showPreviewError('No matching concepts found');
+          clearSearchResults();
+          return;
+        }
+
+        if (searchResults.length === 1) {
+          currentPreview = searchResults[0];
+          showPreviewFound(currentPreview);
+          clearSearchResults();
+          document.getElementById('addBtn').disabled = false;
+          return;
+        }
+
+        showPreviewError('Multiple matches found — select one below');
+        renderSearchResults(searchResults);
+        document.getElementById('addBtn').disabled = true;
+      } catch (err) {
+        showPreviewError('Network error — is the API server running?');
+      }
+    }
+
+    function resetPreview() {
+      currentPreview = null;
+      document.getElementById('addBtn').disabled = true;
+      const card = document.getElementById('previewCard');
+      card.className = 'concept-preview';
+      document.getElementById('previewDot').className = 'preview-dot idle';
+      document.getElementById('previewIdle').style.display = '';
+      document.getElementById('previewContent').style.display = 'none';
+      clearSearchResults();
+    }
+
+    function setPreviewLoading() {
+      document.getElementById('previewDot').className = 'preview-dot loading';
+      document.getElementById('previewIdle').style.display = 'flex';
+      document.getElementById('previewIdle').textContent = 'Looking up concept…';
+      document.getElementById('previewContent').style.display = 'none';
+    }
+
+    function showPreviewFound(c) {
+      const card = document.getElementById('previewCard');
+      card.className = 'concept-preview found';
+      document.getElementById('previewDot').className = 'preview-dot found';
+      document.getElementById('previewIdle').style.display = 'none';
+
+      const content = document.getElementById('previewContent');
+      content.style.display = 'flex';
+      document.getElementById('previewName').textContent = c.concept_name;
+      document.getElementById('previewMeta').textContent =
+        `ID: ${c.concept_id}  ·  ${c.vocabulary_id}  ·  ${c.concept_class || ''}`;
+
+      const badge = document.getElementById('previewDomain');
+      badge.textContent = c.domain_id;
+      badge.className = `domain-badge ${domainClass(c.domain_id)}`;
+    }
+
+    function showPreviewError(msg) {
+      const card = document.getElementById('previewCard');
+      card.className = 'concept-preview error';
+      document.getElementById('previewDot').className = 'preview-dot error';
+      document.getElementById('previewIdle').style.display = '';
+      document.getElementById('previewIdle').textContent = msg;
+      document.getElementById('previewContent').style.display = 'none';
+    }
+
+    function renderSearchResults(results) {
+      const wrap = document.getElementById('searchResults');
+      const list = document.getElementById('searchList');
+      list.innerHTML = '';
+      results.forEach(r => {
+        const item = document.createElement('div');
+        item.className = 'search-item';
+        item.innerHTML = `
+          <span class="search-name">${r.concept_name}</span>
+          <span class="search-meta">${r.concept_id} · ${r.domain_id}</span>
+        `;
+        item.addEventListener('click', () => {
+          currentPreview = r;
+          showPreviewFound(r);
+          clearSearchResults();
+          document.getElementById('addBtn').disabled = false;
+        });
+        list.appendChild(item);
+      });
+      wrap.style.display = 'block';
+    }
+
+    function clearSearchResults() {
+      const wrap = document.getElementById('searchResults');
+      const list = document.getElementById('searchList');
+      list.innerHTML = '';
+      wrap.style.display = 'none';
+      searchResults = [];
+    }
+
+    // ── Add filter ──
+    function addFilter() {
+      if (!currentPreview) return;
+
+      // Deduplicate
+      if (filters.find(f => f.concept_id === currentPreview.concept_id)) {
+        showPreviewError('This concept is already in the filter list');
+        return;
+      }
+
+      filters.push({ ...currentPreview });
+      renderFilters();
+
+      // Reset input
+      document.getElementById('conceptInput').value = '';
+      resetPreview();
+      document.getElementById('executeBtn').disabled = false;
+    }
+
+    // ── Remove filter ──
+    function removeFilter(concept_id) {
+      const idx = filters.findIndex(f => f.concept_id === concept_id);
+      if (idx !== -1) filters.splice(idx, 1);
+      renderFilters();
+      if (filters.length === 0) document.getElementById('executeBtn').disabled = true;
+    }
+
+    // ── Render filters list ──
+    function renderFilters() {
+      const container = document.getElementById('filtersList');
+      const empty     = document.getElementById('emptyState');
+
+      // Remove existing chips
+      container.querySelectorAll('.filter-chip').forEach(el => el.remove());
+
+      if (filters.length === 0) {
+        empty.style.display = '';
+        return;
+      }
+      empty.style.display = 'none';
+
+      filters.forEach(f => {
+        const chip = document.createElement('div');
+        chip.className = 'filter-chip';
+        chip.innerHTML = `
+          <span class="chip-id">${f.concept_id}</span>
+          <span class="chip-name">${f.concept_name}</span>
+          <span class="domain-badge ${domainClass(f.domain_id)}" style="font-size:9px;padding:2px 6px;">${f.domain_id}</span>
+          <button class="chip-remove" onclick="removeFilter(${f.concept_id})" title="Remove">×</button>
+        `;
+        container.appendChild(chip);
+      });
+    }
+
+    // ── Execute filter ──
+    async function executeFilter() {
+      if (filters.length === 0) return;
+
+      // Hide previous results
+      hideResults();
+      setStatus('running', 'Querying OMOP database…');
+
+      const executeBtn = document.getElementById('executeBtn');
+      executeBtn.disabled = true;
+      document.getElementById('executeBtnIcon').textContent = '';
+      document.getElementById('executeBtnLabel').textContent = 'Processing…';
+
+      const spinnerEl = document.createElement('div');
+      spinnerEl.className = 'spinner';
+      spinnerEl.id = 'execSpinner';
+      executeBtn.prepend(spinnerEl);
+
+      try {
+        const concept_ids = filters.map(f => f.concept_id);
+        const res = await fetch(API_BASE + '/api/filter-cohort', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ concept_ids }),
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          showError(data.error || 'Unknown server error');
+          setStatus('error', 'Filter failed');
+          return;
+        }
+
+        lastResult = data;
+
+        if (data.person_count === 0) {
+          document.getElementById('noResults').classList.add('visible');
+          setStatus('idle', 'No patients matched the filter criteria');
+          return;
+        }
+
+        showResults(data);
+        setStatus('success', `Extracted ${data.person_count.toLocaleString()} patients · ${data.total_rows?.toLocaleString() || 0} total rows`);
+
+      } catch (err) {
+        showError('Network error — is the Flask server running on port 5050?');
+        setStatus('error', 'Connection failed');
+      } finally {
+        executeBtn.disabled = false;
+        document.getElementById('executeBtnIcon').textContent = '▶';
+        document.getElementById('executeBtnLabel').textContent = 'Execute Filter & Export DuckDB';
+        const sp = document.getElementById('execSpinner');
+        if (sp) sp.remove();
+      }
+    }
+
+    // ── Show results ──
+    function showResults(data) {
+      const card = document.getElementById('resultsCard');
+      card.classList.add('visible');
+
+      document.getElementById('personCount').textContent = data.person_count.toLocaleString();
+      document.getElementById('totalRows').textContent =
+        `${(data.total_rows || 0).toLocaleString()} total rows extracted`;
+      document.getElementById('fileName').textContent = data.filename || 'cohort_filter.duckdb';
+
+      // Render table counts
+      const grid = document.getElementById('countsGrid');
+      grid.innerHTML = '';
+
+      const counts = data.table_counts || {};
+      const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+
+      sorted.forEach(([table, count], i) => {
+        const row = document.createElement('div');
+        row.className = 'count-row';
+        row.style.animationDelay = `${i * 30}ms`;
+        row.innerHTML = `
+          <span class="count-name">${table}</span>
+          <span class="count-value">${count.toLocaleString()}</span>
+        `;
+        grid.appendChild(row);
+      });
+    }
+
+    // ── Hide results ──
+    function hideResults() {
+      document.getElementById('resultsCard').classList.remove('visible');
+      document.getElementById('errorCard').classList.remove('visible');
+      document.getElementById('noResults').classList.remove('visible');
+    }
+
+    // ── Show error ──
+    function showError(msg) {
+      const card = document.getElementById('errorCard');
+      card.classList.add('visible');
+      document.getElementById('errorBody').textContent = msg;
+    }
+
+    // ── Status bar ──
+    function setStatus(state, text) {
+      const dot  = document.getElementById('statusDot');
+      const span = document.getElementById('statusText');
+      dot.className  = `status-dot ${state}`;
+      span.textContent = text;
+    }
+
+    // ── Download ──
+    function downloadFile() {
+      if (!lastResult?.download_url) return;
+      const a = document.createElement('a');
+      a.href     = API_BASE + lastResult.download_url;
+      a.download = lastResult.filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+  </script>
+</body>
+</html>

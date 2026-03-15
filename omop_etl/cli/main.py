@@ -546,7 +546,7 @@ def export_cohort_cmd(cohort_id, output_dir, cohort_name, cohort_description,
                        "Did you run 'create-cohort' first?", err=True)
             sys.exit(1)
 
-        exporter = BundleExporter()
+        exporter = BundleExporter(conn, schema=schema)
         zip_path = exporter.export(
             data=data,
             output_dir=output_dir,

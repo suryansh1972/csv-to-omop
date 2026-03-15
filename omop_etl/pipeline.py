@@ -239,6 +239,7 @@ class OMOPPipeline:
             resolver=self.resolver,
             person_id_column=cfg.person_id_column,
             allow_uuid_person_id=cfg.allow_uuid_person_id,
+            profiler_cfg=cfg.profiler,
         )
         if not profile.person_id_col:
             if cfg.allow_synthetic_person_id:

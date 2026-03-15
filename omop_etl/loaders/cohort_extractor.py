@@ -15,22 +15,6 @@ from typing import Any, Dict, List, Optional, Set
 
 logger = logging.getLogger(__name__)
 
-# Tables whose rows are scoped by person_id
-_PERSON_SCOPED_TABLES = [
-    "person",
-    "observation_period",
-    "visit_occurrence",
-    "condition_occurrence",
-    "drug_exposure",
-    "measurement",
-    "observation",
-    "procedure_occurrence",
-    "device_exposure",
-    "death",
-    "note",
-]
-
-
 class CohortExtractor:
     """
     Extracts all OMOP data belonging to a cohort, plus a filtered
@@ -84,6 +68,12 @@ class CohortExtractor:
     def _table_exists(self, table: str) -> bool:
         return table in self._table_columns
 
+    def _get_person_scoped_tables(self) -> List[str]:
+        """Return all tables in the schema that carry a person_id column."""
+        return sorted(
+            [table for table, cols in self._table_columns.items() if "person_id" in cols]
+        )
+
     # ------------------------------------------------------------------
     # Public API
     # ------------------------------------------------------------------
@@ -118,7 +108,7 @@ class CohortExtractor:
         )
 
         # Step 2: Extract clinical tables
-        clinical_tables = tables or _PERSON_SCOPED_TABLES
+        clinical_tables = tables or self._get_person_scoped_tables()
         result: Dict[str, List[Dict[str, Any]]] = {}
         all_concept_ids: Set[int] = set()
 

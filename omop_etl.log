@@ -229,3 +229,44 @@
 2026-03-12 15:47:17,699 [INFO] pipeline:   Committed 14 visit_occurrence records
 2026-03-12 15:47:17,699 [INFO] pipeline: Pass 2: Writing clinical events...
 2026-03-12 15:48:35,795 [INFO] pipeline: ETL complete. Processed 14 source rows.
+2026-03-15 14:31:18,439 [INFO] core.profiler: Profiling dataset: SANSCOG_ClinicalAssessment_IUDXTestData (2).csv
+2026-03-15 14:31:18,452 [INFO] core.profiler: Loaded 161 mapped field names from nurse_v10_snomed_mapping.csv
+2026-03-15 14:31:18,457 [INFO] core.profiler: Loaded 1822 mapped field names from clinical_v10_snomed_mapping.csv
+2026-03-15 14:31:18,460 [INFO] core.profiler: Dataset: 1702 columns, 14 rows
+2026-03-15 14:31:18,841 [INFO] core.profiler: Profile complete: person_id=hmse0:note6, gender=None, age=intro_header1:age, date_cols=5, groups=192
+2026-03-15 14:31:43,428 [INFO] core.profiler: Profiling dataset: SANSCOG_ClinicalAssessment_IUDXTestData (2).csv
+2026-03-15 14:31:43,443 [INFO] core.profiler: Loaded 161 mapped field names from nurse_v10_snomed_mapping.csv
+2026-03-15 14:31:43,448 [INFO] core.profiler: Loaded 1822 mapped field names from clinical_v10_snomed_mapping.csv
+2026-03-15 14:31:43,452 [INFO] core.profiler: Dataset: 1702 columns, 14 rows
+2026-03-15 14:31:43,924 [INFO] core.profiler: Profile complete: person_id=hmse0:note6, gender=None, age=intro_header1:age, date_cols=5, groups=192
+2026-03-15 14:31:54,222 [INFO] core.profiler: Profiling dataset: SANSCOG_ClinicalAssessment_IUDXTestData (2).csv
+2026-03-15 14:31:54,238 [INFO] core.profiler: Loaded 161 mapped field names from nurse_v10_snomed_mapping.csv
+2026-03-15 14:31:54,246 [INFO] core.profiler: Loaded 1822 mapped field names from clinical_v10_snomed_mapping.csv
+2026-03-15 14:31:54,265 [INFO] core.profiler: Dataset: 1702 columns, 14 rows
+2026-03-15 14:31:54,684 [INFO] core.profiler: Profile complete: person_id=hmse0:note6, gender=None, age=intro_header1:age, date_cols=5, groups=192
+2026-03-15 14:31:55,785 [INFO] pipeline: Connected to localhost:5432/omop
+2026-03-15 14:31:55,834 [INFO] core.id_generator: ID generators initialized from database
+2026-03-15 14:31:55,834 [INFO] pipeline: Step 1/5: Profiling source CSV...
+2026-03-15 14:31:55,834 [INFO] core.profiler: Profiling dataset: SANSCOG_ClinicalAssessment_IUDXTestData (2).csv
+2026-03-15 14:31:55,849 [INFO] core.profiler: Loaded 161 mapped field names from nurse_v10_snomed_mapping.csv
+2026-03-15 14:31:55,855 [INFO] core.profiler: Loaded 1822 mapped field names from clinical_v10_snomed_mapping.csv
+2026-03-15 14:31:55,858 [INFO] core.profiler: Dataset: 1702 columns, 14 rows
+2026-03-15 14:31:56,670 [INFO] core.profiler: Profile complete: person_id=hmse0:note6, gender=intro_header1:gender, age=intro_header1:age, date_cols=5, groups=192
+2026-03-15 14:31:56,671 [INFO] pipeline: Step 2/5: Loading SNOMED mappings...
+2026-03-15 14:31:56,671 [INFO] core.concept_resolver: Mapping file nurse_v10_snomed_mapping.csv: name_col='name', snomed_col='snomed'
+2026-03-15 14:31:56,672 [INFO] core.concept_resolver: Parsed 161 field→SNOMED mappings from nurse_v10_snomed_mapping.csv
+2026-03-15 14:31:56,672 [INFO] core.concept_resolver: Mapping file clinical_v10_snomed_mapping.csv: name_col='name', snomed_col='snomed'
+2026-03-15 14:31:56,679 [INFO] core.concept_resolver: Parsed 1682 field→SNOMED mappings from clinical_v10_snomed_mapping.csv
+2026-03-15 14:31:56,680 [INFO] pipeline: Loaded 1822 field→SNOMED mappings
+2026-03-15 14:31:56,680 [INFO] pipeline: Step 3/5: Classifying columns to OMOP domains...
+2026-03-15 14:31:57,689 [INFO] core.domain_classifier: Classification: 635 SNOMED-mapped, condition_occurrence=33, drug_exposure=18, measurement=285, observation=327, procedure_occurrence=1, skip=1038
+2026-03-15 14:31:57,689 [INFO] pipeline: Step 4/5: Resolving type concept IDs from DB...
+2026-03-15 14:31:57,725 [INFO] pipeline: Type concepts resolved from DB: {'visit_type': 0, 'obs_type': 32817, 'meas_type': 0, 'cond_type': 0, 'drug_type': 0, 'obs_period_type': 0, 'visit_concept': 9202, 'cond_status': 32867}
+2026-03-15 14:31:57,725 [INFO] pipeline: Step 5/5: Two-pass ETL (persons+visits → then events)...
+2026-03-15 14:31:57,727 [INFO] pipeline: Loaded 14 source rows into memory
+2026-03-15 14:31:57,732 [INFO] pipeline: Detected source visit ordinal column: intro_header1:visits
+2026-03-15 14:31:57,732 [INFO] pipeline: Pass 1: Writing persons and visit_occurrence...
+2026-03-15 14:31:57,781 [INFO] pipeline:   Committed 14 person records
+2026-03-15 14:31:57,813 [INFO] pipeline:   Committed 14 visit_occurrence records
+2026-03-15 14:31:57,813 [INFO] pipeline: Pass 2: Writing clinical events...
+2026-03-15 14:33:17,923 [INFO] pipeline: ETL complete. Processed 14 source rows.
