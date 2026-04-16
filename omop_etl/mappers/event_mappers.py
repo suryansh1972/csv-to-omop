@@ -284,13 +284,19 @@ class ConditionMapper:
             return None
         raw = str(raw).strip()
 
-        # Only create a condition record for affirmative non-numeric signals
-        if route.value_strategy != "value_as_number" and not _is_affirmative(raw, self.cfg):
-            return None
         if route.concept_id == 0:
             return None
 
         cond_date = _best_date(row, self.date_cols)
+        # Both affirmative ("yes") and non-affirmative ("no") values produce
+        # a record.  condition_status_concept_id signals presence vs absence;
+        # condition_status_source_value preserves the original raw value so
+        # "yes"/"no" is always visible in the table.
+        is_present = (
+            route.value_strategy == "value_as_number"
+            or _is_affirmative(raw, self.cfg)
+        )
+        status_concept_id = self.cond_status_concept_id if is_present else 0
         return {
             "condition_occurrence_id":       self.id_gen.next_id("condition_occurrence"),
             "person_id":                     person_id,
@@ -300,7 +306,7 @@ class ConditionMapper:
             "condition_end_date":            None,
             "condition_end_datetime":        None,
             "condition_type_concept_id":     self.cond_type_concept_id,
-            "condition_status_concept_id":   self.cond_status_concept_id,
+            "condition_status_concept_id":   status_concept_id,
             "stop_reason":                   None,
             "provider_id":                   None,
             "visit_occurrence_id":           visit_id,

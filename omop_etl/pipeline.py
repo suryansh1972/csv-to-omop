@@ -196,10 +196,12 @@ class OMOPPipeline:
         resolved = {}
         for key, (domain_id, concept_name) in lookups.items():
             try:
-                resolved[key] = self.resolver.lookup_standard_concept_id(
+                standard_only = domain_id != "Type Concept"
+                resolved[key] = self.resolver.lookup_concept_id(
                     concept_name,
                     domains=[domain_id],
                     allow_partial=True,
+                    standard_only=standard_only,
                 )
                 logger.debug(f"  Resolved {key} → concept_id={resolved[key]} ('{concept_name}')")
             except Exception as e:
@@ -264,7 +266,11 @@ class OMOPPipeline:
         logger.info("Step 3/5: Classifying columns to OMOP domains...")
         if progress_callback:
             progress_callback(2, 5, "Classifying columns to OMOP domains...")
-        classifier = DomainClassifier(self.resolver, field_snomed_map)
+        classifier = DomainClassifier(
+            self.resolver,
+            field_snomed_map,
+            domain_cfg=cfg.domains,
+        )
         routes = classifier.classify_all(profile)
         candidate_mapped_cols = [c for c in profile.columns if c in field_snomed_map]
         resolved_mapped_cols = sum(1 for route in routes.values() if route.is_mapped)

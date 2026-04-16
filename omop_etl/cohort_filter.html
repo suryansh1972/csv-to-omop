@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>OMOP Cohort Filter</title>
+  <title>OMOP Cohort Builder</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
   <style>
@@ -613,8 +613,8 @@
     <header>
       <div class="logo-mark">CDM</div>
       <div class="header-text">
-        <div class="header-title">OMOP Cohort Filter</div>
-        <div class="header-sub">Concept-ID driven patient cohort extraction → DuckDB</div>
+        <div class="header-title">OMOP Cohort Builder</div>
+        <div class="header-sub">Concept driven patient cohort extraction </div>
       </div>
       <div class="header-badge">CDM 5.4</div>
     </header>
@@ -754,9 +754,18 @@
     // - served by Flask on :5050 (same-origin)
     // - opened as file://
     // - served by a dev server like Live Server on :5500
-    const API_BASE = (location.protocol === 'file:' || location.port !== '5050')
-      ? 'http://localhost:5050'
-      : ''; // same-origin when served by Flask
+    // Optional override: add ?api=http://127.0.0.1:5050 to the URL.
+    const API_PORT = '5050';
+    const API_HOST = (location.hostname && location.hostname.length > 0)
+      ? location.hostname
+      : '127.0.0.1';
+    const urlParams  = new URLSearchParams(location.search);
+    const apiOverride = urlParams.get('api');
+    const API_BASE = apiOverride
+      ? apiOverride.replace(/\/$/, '')
+      : (location.protocol === 'file:' || location.port !== API_PORT)
+        ? `http://${API_HOST}:${API_PORT}`
+        : ''; // same-origin when served by Flask
 
     // ── State ──
     const filters  = [];        // { concept_id, concept_name, domain_id, vocab_id }
@@ -1017,7 +1026,7 @@
         setStatus('success', `Extracted ${data.person_count.toLocaleString()} patients · ${data.total_rows?.toLocaleString() || 0} total rows`);
 
       } catch (err) {
-        showError('Network error — is the Flask server running on port 5050?');
+        showError(`Network error — is the API server running on port ${API_PORT}?`);
         setStatus('error', 'Connection failed');
       } finally {
         executeBtn.disabled = false;

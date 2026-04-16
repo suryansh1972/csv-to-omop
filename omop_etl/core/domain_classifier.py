@@ -1,39 +1,29 @@
 """
 domain_classifier.py - Routes each CSV column to the correct OMOP table.
 
-Key change: passes col.dtype as field_dtype_hint to get_best_concept_for_field
-so the concept prioritization framework can reward measurement-compatible
-concepts for numeric fields.
+Domain routing is vocabulary-driven: the OMOP concept's domain_id
+is the authority for which table a column maps to.  col.dtype is passed
+as a scoring hint to ConceptResolver so that numeric fields prefer
+measurement-compatible concepts during multi-code prioritisation.
+
+If no concept resolves, the column is skipped — there is no basis for
+routing it anywhere and silent misfiling is worse than omission. Numeric
+fields that resolve to non-numeric-compatible domains are also skipped
+to prevent cross-domain misrouting (see DomainConfig).
 """
 from dataclasses import dataclass
 from typing import Dict, List, Optional
 import logging
 
+from config.settings import DomainConfig
 from core.profiler import ColumnProfile, DatasetProfile
 
 logger = logging.getLogger(__name__)
-
-# OMOP domain → CDM table (CDM spec — appropriate here, not in resolver)
-DOMAIN_TO_TABLE = {
-    "Condition":   "condition_occurrence",
-    "Measurement": "measurement",
-    "Observation": "observation",
-    "Drug":        "drug_exposure",
-    "Visit":       "visit_occurrence",
-    "Device":      "device_exposure",
-    "Procedure":   "procedure_occurrence",
-    "Specimen":    "specimen",
-    "Death":       "death",
-    "Note":        "note",
-}
 
 VALUE_STRATEGY_NUMERIC  = "value_as_number"
 VALUE_STRATEGY_CONCEPT  = "value_as_concept_id"
 VALUE_STRATEGY_STRING   = "value_as_string"
 VALUE_STRATEGY_SKIP     = "skip"
-
-# Domains that are numerically compatible
-_NUMERIC_COMPATIBLE_DOMAINS = {"Measurement", "Observation", "Meas Value"}
 
 
 @dataclass
@@ -51,13 +41,27 @@ class DomainClassifier:
     """
     Classifies each CSV column to an OMOP target table and value strategy.
 
-    Passes col.dtype as a hint to ConceptResolver so the multi-code
-    prioritization can prefer measurement-domain concepts for numeric fields.
+    Routing is vocabulary-driven: the OMOP concept's domain_id
+    determines the target table.  Columns with no resolved concept are
+    skipped — dtype is never used as a routing fallback. Numeric fields
+    mapped to non-numeric-compatible domains are skipped to avoid
+    cross-domain misrouting.
+
+    col.dtype is passed as a scoring hint to ConceptResolver so that
+    numeric fields receive a modest boost toward measurement-compatible
+    concepts during multi-code prioritisation.  It influences which concept
+    wins the scoring race; it has no role after that.
     """
 
-    def __init__(self, concept_resolver, field_snomed_map: Dict[str, List[str]]):
+    def __init__(
+        self,
+        concept_resolver,
+        field_snomed_map: Dict[str, List[str]],
+        domain_cfg: Optional[DomainConfig] = None,
+    ):
         self.resolver         = concept_resolver
         self.field_snomed_map = field_snomed_map
+        self.domain_cfg       = domain_cfg or DomainConfig()
 
     def _should_skip(self, col: ColumnProfile) -> bool:
         return (
@@ -74,51 +78,55 @@ class DomainClassifier:
         if self._should_skip(col):
             return FieldRoute(col.name, "", 0, VALUE_STRATEGY_SKIP, "", False, 0)
 
-        snomed_codes = self.field_snomed_map.get(col.name, [])
-        concept_id   = 0
+        snomed_codes      = self.field_snomed_map.get(col.name, [])
+        concept_id        = 0
         source_concept_id = 0
-        domain       = ""
-        is_mapped    = False
+        domain            = ""
+        is_mapped         = False
 
         if snomed_codes:
-            # Pass dtype hint so the resolver can weight candidates correctly
+            # dtype is passed only as a scoring hint so the resolver can
+            # prefer measurement-compatible concepts for numeric fields.
+            # It does NOT drive the routing decision below.
             concept_id = self.resolver.get_best_concept_for_field(
                 col.name, snomed_codes, field_dtype_hint=col.dtype
             )
             if concept_id > 0:
                 domain    = self.resolver.get_domain_for_concept(concept_id)
                 is_mapped = True
-            # Retrieve the original source SNOMED concept_id
             source_concept_id = self.resolver.get_source_concept_for_field(
                 col.name, snomed_codes, field_dtype_hint=col.dtype
             )
 
-        is_numeric = col.dtype == "numeric"
+        # ── Table routing — vocabulary only ──────────────────────────────
+        # The concept's domain_id from the OMOP vocabulary is the sole
+        # authority.  If no concept resolved, the column is skipped —
+        # there is no basis for routing it anywhere.
+        if not (domain and domain in self.domain_cfg.domain_to_table):
+            logger.debug(f"Column '{col.name}': no concept resolved — skipping")
+            return FieldRoute(col.name, "", 0, VALUE_STRATEGY_SKIP, "", False, 0)
 
-        if is_numeric:
-            target_table = "measurement"
-            domain       = "Measurement"
-            # If the best concept resolved to an incompatible domain, discard it
-            if concept_id > 0:
-                concept_domain = self.resolver.get_domain_for_concept(concept_id)
-                if concept_domain not in _NUMERIC_COMPATIBLE_DOMAINS:
-                    concept_id = 0
-                    is_mapped  = False
-        elif domain and domain in DOMAIN_TO_TABLE:
-            target_table = DOMAIN_TO_TABLE[domain]
-        else:
-            target_table = "observation"
-            domain       = "Observation"
+        # Guard: numeric fields should only map into numeric-compatible domains.
+        # If a numeric field resolves to a non-numeric domain, skip to avoid
+        # cross-domain misrouting (see DomainConfig.numeric_compatible_domains).
+        if col.dtype == "numeric" and domain not in self.domain_cfg.numeric_compatible_domains:
+            logger.debug(
+                f"Column '{col.name}': numeric dtype but domain '{domain}' "
+                f"is not numeric-compatible — skipping"
+            )
+            return FieldRoute(col.name, "", 0, VALUE_STRATEGY_SKIP, "", False, 0)
 
-        # Value strategy
-        if is_numeric:
-            value_strategy = VALUE_STRATEGY_NUMERIC
-        elif col.dtype in ("boolean", "categorical"):
-            value_strategy = VALUE_STRATEGY_CONCEPT
-        elif col.dtype == "text":
-            value_strategy = VALUE_STRATEGY_STRING
-        else:
-            value_strategy = VALUE_STRATEGY_CONCEPT
+        target_table = self.domain_cfg.domain_to_table[domain]
+
+        # ── Value strategy — driven by col.dtype only ────────────────────
+        # This is independent of the routing decision above.  A drug_exposure
+        # row can still carry value_as_number (e.g. a dose quantity field).
+        value_strategy = self.domain_cfg.dtype_to_value_strategy.get(
+            col.dtype, VALUE_STRATEGY_CONCEPT
+        )
+
+        if value_strategy == VALUE_STRATEGY_SKIP:
+            return FieldRoute(col.name, "", 0, VALUE_STRATEGY_SKIP, "", False, 0)
 
         return FieldRoute(col.name, target_table, concept_id, value_strategy, domain, is_mapped, source_concept_id)
 

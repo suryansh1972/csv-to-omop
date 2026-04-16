@@ -53,19 +53,29 @@ def psql_exec(container: str, user: str, db: str,
 
 def psql_copy(container: str, user: str, db: str,
               table: str, csv_path: str) -> bool:
-    """Run a \\COPY command for a vocabulary CSV file."""
+    """Run a \\COPY command for a vocabulary CSV file.
+
+    IMPORTANT: session_replication_role = replica is set in the SAME psql
+    invocation so it applies to the COPY (each docker-exec is a new session).
+    """
     copy_sql = (
         f"\\COPY {table} FROM '{csv_path}' "
         f"WITH DELIMITER E'\\t' CSV HEADER QUOTE E'\\b';"
     )
-    cmd = ["docker", "exec", container,
-           "psql", "-U", user, "-d", db, "-c", copy_sql]
+    cmd = [
+        "docker", "exec", container,
+        "psql", "-U", user, "-d", db,
+        "-c", "SET session_replication_role = replica;",
+        "-c", copy_sql,
+    ]
     print(f"  → Loading {table} from {csv_path} …", end=" ", flush=True)
     result = subprocess.run(cmd, capture_output=True, text=True)
     if result.returncode == 0:
         # Extract row count from "COPY N" message
         output = result.stdout.strip()
-        count = output.replace("COPY", "").strip()
+        # psql outputs "SET\nCOPY N" — grab the last line
+        lines = [l for l in output.split('\n') if l.startswith('COPY')]
+        count = lines[-1].replace('COPY', '').strip() if lines else '?'
         print(f"✅  {count} rows")
         return True
     else:
@@ -138,15 +148,24 @@ def main():
     )
     print(f"  ✅ Vocabulary folder copied.")
 
-    # Step 4: Disable FK constraints
-    print(f"\n[STEP 4] Disabling FK constraints (session_replication_role = replica)…")
-    psql_exec(container, user, db,
-              "SET session_replication_role = replica;",
-              "Disable FK constraints")
-    print("  ✅ FK constraints disabled.")
+    # Step 4: Truncate vocabulary tables (clean slate)
+    print(f"\n[STEP 4] Truncating vocabulary tables (clean slate)…")
+    truncate_order = [
+        "drug_strength", "concept_ancestor", "concept_synonym",
+        "concept_relationship", "concept", "relationship",
+        "concept_class", "domain", "vocabulary",
+    ]
+    for table in truncate_order:
+        psql_exec(container, user, db,
+                  f"TRUNCATE TABLE {table} CASCADE;",
+                  f"Truncate {table}", allow_fail=True)
+    print("  ✅ All vocabulary tables truncated.")
 
     # Step 5: Load each vocabulary CSV
+    # NOTE: session_replication_role = replica is set INSIDE each psql_copy
+    # call so it applies in the same connection as the \COPY.
     print(f"\n[STEP 5] Loading vocabulary CSVs into OMOP tables…")
+    print(f"         (FK constraints bypassed per-session)")
     failures = []
     for table, csv_file in TABLE_CSV_MAP:
         if csv_file not in found:
@@ -156,13 +175,6 @@ def main():
         ok = psql_copy(container, user, db, table, container_csv)
         if not ok:
             failures.append((table, csv_file))
-
-    # Step 6: Re-enable FK constraints
-    print(f"\n[STEP 6] Re-enabling FK constraints…")
-    psql_exec(container, user, db,
-              "SET session_replication_role = DEFAULT;",
-              "Re-enable FK constraints")
-    print("  ✅ FK constraints re-enabled.")
 
     # Step 7: Verify row counts
     print(f"\n[STEP 7] Verifying vocabulary row counts…")

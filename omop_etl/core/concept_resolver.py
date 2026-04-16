@@ -516,24 +516,29 @@ class ConceptResolver:
         self._domain_cache[concept_id] = domain
         return domain
 
-    def lookup_standard_concept_id(
+    def lookup_concept_id(
         self,
         concept_name: str,
         domains: Optional[List[str]] = None,
         allow_partial: bool = True,
+        standard_only: bool = True,
     ) -> int:
-        """Find a standard concept by name with optional domain filter."""
+        """Find a concept by name with optional domain filter and standard-only toggle."""
         if not concept_name:
             return self.UNKNOWN_CONCEPT_ID
 
-        base  = "SELECT concept_id FROM concept WHERE standard_concept='S' AND invalid_reason IS NULL"
+        base = "SELECT concept_id FROM concept WHERE invalid_reason IS NULL"
         params: list = []
+        if standard_only:
+            base += " AND standard_concept='S'"
         if domains:
             base += " AND domain_id = ANY(%s)"
             params.append(domains)
 
+        order = " ORDER BY CASE WHEN standard_concept='S' THEN 0 ELSE 1 END, concept_id"
+
         row = self._fetchone(
-            base + " AND LOWER(concept_name)=LOWER(%s) ORDER BY concept_id LIMIT 1",
+            base + " AND LOWER(concept_name)=LOWER(%s)" + order + " LIMIT 1",
             tuple(params + [concept_name.strip()]),
         )
         if row:
@@ -541,13 +546,27 @@ class ConceptResolver:
 
         if allow_partial:
             row = self._fetchone(
-                base + " AND concept_name ILIKE %s ORDER BY concept_id LIMIT 1",
+                base + " AND concept_name ILIKE %s" + order + " LIMIT 1",
                 tuple(params + [f"%{concept_name.strip()}%"]),
             )
             if row:
                 return row[0]
 
         return self.UNKNOWN_CONCEPT_ID
+
+    def lookup_standard_concept_id(
+        self,
+        concept_name: str,
+        domains: Optional[List[str]] = None,
+        allow_partial: bool = True,
+    ) -> int:
+        """Find a standard concept by name with optional domain filter."""
+        return self.lookup_concept_id(
+            concept_name,
+            domains=domains,
+            allow_partial=allow_partial,
+            standard_only=True,
+        )
 
     def resolve_value_as_concept(self, value_str: str) -> int:
         """Resolve a categorical answer value to an OMOP concept_id."""

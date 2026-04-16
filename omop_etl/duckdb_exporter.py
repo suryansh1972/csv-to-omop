@@ -506,10 +506,20 @@ class DuckDBExporter:
         columns = list(rows[0].keys())
         col_str = ", ".join(columns)
         placeholders = ", ".join(["?" for _ in columns])
-        sql = f"INSERT OR IGNORE INTO {table_name} ({col_str}) VALUES ({placeholders})"
+        if table_name == "concept_relationship":
+            sql = f"INSERT INTO {table_name} ({col_str}) VALUES ({placeholders})"
+        else:
+            sql = f"INSERT OR IGNORE INTO {table_name} ({col_str}) VALUES ({placeholders})"
 
         batch = []
+        seen = set()
         for row in rows:
+            if table_name == "concept_relationship":
+                if row.get("concept_id_1") is None or row.get("concept_id_2") is None:
+                    continue
+                if not row.get("relationship_id"):
+                    continue
+            # Build the row tuple once so we can de-duplicate safely
             values = []
             for col in columns:
                 val = row.get(col)
@@ -519,6 +529,11 @@ class DuckDBExporter:
                 elif isinstance(val, date):
                     val = val.isoformat()
                 values.append(val)
+            tup = tuple(values)
+            if table_name == "concept_relationship":
+                if tup in seen:
+                    continue
+                seen.add(tup)
             batch.append(values)
 
         try:

@@ -10,6 +10,7 @@ Reads all paths from config.json.
 import subprocess
 import sys
 import json
+import re
 from pathlib import Path
 
 
@@ -56,17 +57,26 @@ def psql(container: str, user: str, db: str,
 
 def psql_copy_stage(container: str, user: str, db: str,
                     stage_table: str, csv_path: str) -> bool:
-    """Load a CSV into a temporary staging table."""
+    """Load a CSV into a temporary staging table.
+
+    session_replication_role = replica is set in the SAME psql session
+    so FK constraints are bypassed.
+    """
     copy_sql = (
         f"\\COPY {stage_table} FROM '{csv_path}' "
         f"WITH DELIMITER E'\\t' CSV HEADER QUOTE E'\\b';"
     )
-    cmd = ["docker", "exec", container,
-           "psql", "-U", user, "-d", db, "-c", copy_sql]
+    cmd = [
+        "docker", "exec", container,
+        "psql", "-U", user, "-d", db,
+        "-c", "SET session_replication_role = replica;",
+        "-c", copy_sql,
+    ]
     print(f"  → Staging {stage_table} from {csv_path} …", end=" ", flush=True)
     result = subprocess.run(cmd, capture_output=True, text=True)
     if result.returncode == 0:
-        count = result.stdout.strip().replace("COPY", "").strip()
+        lines = [l for l in result.stdout.strip().split('\n') if l.startswith('COPY')]
+        count = lines[-1].replace('COPY', '').strip() if lines else '?'
         print(f"✅  {count} rows staged")
         return True
     else:
@@ -132,47 +142,81 @@ def main():
 
     # Step 3: Copy gender vocabulary folder into container
     print(f"\n[STEP 3] Copying gender vocab folder → container:{gender_container} …")
-    run(
-        ["docker", "cp", str(local_dir), f"{container}:{gender_container}"],
-        "docker cp gender_vocabulary folder"
+    # Remove any previous copy so docker-cp creates the dir fresh
+    # (otherwise docker-cp nests the folder INSIDE the existing dir)
+    subprocess.run(
+        ["docker", "exec", container, "rm", "-rf", gender_container],
+        capture_output=True, text=True,
     )
+    # Copy *contents* so we don't end up with /gender_vocabulary/gender/...
+    run(
+        ["docker", "cp", f"{str(local_dir)}/.", f"{container}:{gender_container}"],
+        "docker cp gender_vocabulary contents"
+    )
+
+    # Detect whether files landed in the expected path or a nested folder
+    gender_container_effective = gender_container
+    sample_file = gender_files[0] if gender_files else None
+    if sample_file:
+        def container_has_file(path: str) -> bool:
+            return subprocess.run(
+                ["docker", "exec", container, "sh", "-lc", f"test -f '{path}'"],
+                capture_output=True, text=True,
+            ).returncode == 0
+
+        if not container_has_file(f"{gender_container}/{sample_file}"):
+            nested = f"{gender_container}/gender"
+            if container_has_file(f"{nested}/{sample_file}"):
+                gender_container_effective = nested
+                print(f"  ⚠️  Detected nested folder. Using: {gender_container_effective}")
+            else:
+                print("  [ERROR] Gender CSVs not found in container after copy.")
+                sys.exit(1)
+
+    # Verify files landed correctly
+    result = subprocess.run(
+        ["docker", "exec", container, "ls", "-1", gender_container_effective],
+        capture_output=True, text=True,
+    )
+    print("  Files in container:")
+    for f in result.stdout.strip().split("\n"):
+        if f.strip():
+            print(f"    {f}")
     print("  ✅ Gender vocabulary folder copied.")
 
-    # Step 4: Disable FK constraints
-    print(f"\n[STEP 4] Disabling FK constraints…")
-    psql(container, user, db,
-         "SET session_replication_role = replica;",
-         "Disable FK constraints")
-    print("  ✅ FK constraints disabled.")
-
-    # Step 5: Create temp staging tables
-    print(f"\n[STEP 5] Creating temporary staging tables…")
+    # Step 4: Create staging tables (UNLOGGED so they persist across sessions)
+    print(f"\n[STEP 4] Creating staging tables…")
     for _, stage_table, _ in TABLE_CONFIG:
         real_table = stage_table.replace("stage_", "")
         psql(container, user, db,
-             f"CREATE TEMP TABLE {stage_table} (LIKE {real_table});",
-             f"CREATE TEMP TABLE {stage_table}")
+             f"DROP TABLE IF EXISTS {stage_table};",
+             f"DROP TABLE IF EXISTS {stage_table}")
+        psql(container, user, db,
+             f"CREATE UNLOGGED TABLE {stage_table} (LIKE {real_table});",
+             f"CREATE UNLOGGED TABLE {stage_table}")
     print("  ✅ All staging tables created.")
 
-    # Step 6: Load gender CSVs into staging tables
-    print(f"\n[STEP 6] Loading gender CSVs into staging tables…")
+    # Step 5: Load gender CSVs into staging tables
+    print(f"\n[STEP 5] Loading gender CSVs into staging tables…")
+    print(f"         (FK constraints bypassed per-session)")
     staged = set()
     for real_table, stage_table, csv_file in TABLE_CONFIG:
         if csv_file not in found:
             print(f"  ⚠️  Skipping {stage_table} — {csv_file} not found.")
             continue
-        container_csv = f"{gender_container}/{csv_file}"
+        container_csv = f"{gender_container_effective}/{csv_file}"
         ok = psql_copy_stage(container, user, db, stage_table, container_csv)
         if ok:
             staged.add(real_table)
 
-    # Step 7: Merge staged rows into real tables (INSERT … ON CONFLICT DO NOTHING)
-    print(f"\n[STEP 7] Merging staged data into OMOP tables (no overwrites)…")
+    # Step 6: Merge staged rows into real tables (INSERT … ON CONFLICT DO NOTHING)
+    print(f"\n[STEP 6] Merging staged data into OMOP tables (no overwrites)…")
     for real_table, stage_table, _ in TABLE_CONFIG:
         if real_table not in staged:
             print(f"  ⚠️  Skipping merge for {real_table} — nothing staged.")
             continue
         merge_sql = (
+            f"SET session_replication_role = replica; "
             f"INSERT INTO {real_table} "
             f"SELECT * FROM {stage_table} "
             f"ON CONFLICT DO NOTHING;"
@@ -184,15 +228,8 @@ def main():
         inserted = output.replace("INSERT 0", "").strip() if output else "?"
         print(f"      {real_table:<30} {inserted:>6} new rows inserted")
 
-    # Step 8: Re-enable FK constraints
-    print(f"\n[STEP 8] Re-enabling FK constraints…")
-    psql(container, user, db,
-         "SET session_replication_role = DEFAULT;",
-         "Re-enable FK constraints")
-    print("  ✅ FK constraints re-enabled.")
-
-    # Step 9: Verify gender concepts exist
-    print(f"\n[STEP 9] Verifying gender concepts in OMOP…")
+    # Step 7: Verify gender concepts exist
+    print(f"\n[STEP 7] Verifying gender concepts in OMOP…")
     verify_sql = (
         "SELECT concept_id, concept_name, vocabulary_id, domain_id "
         "FROM concept WHERE domain_id = 'Gender' LIMIT 20;"
@@ -203,10 +240,30 @@ def main():
         capture_output=True, text=True
     )
     print(result.stdout)
-    if "0 rows" in result.stdout or result.stdout.strip() == "":
-        print("  ⚠️  No gender concepts found. Check your CSV files.")
+    count_sql = "SELECT COUNT(*) FROM concept WHERE domain_id = 'Gender';"
+    count_result = subprocess.run(
+        ["docker", "exec", container,
+         "psql", "-U", user, "-d", db, "-t", "-A", "-c", count_sql],
+        capture_output=True, text=True
+    )
+    if count_result.returncode != 0:
+        print("  ⚠️  Could not determine row count from verification query.")
     else:
-        print("  ✅ Gender concepts verified.")
+        count_match = re.search(r"\\d+", count_result.stdout.strip())
+        if not count_match:
+            print("  ⚠️  Could not determine row count from verification query.")
+        elif int(count_match.group(0)) == 0:
+            print("  ⚠️  No gender concepts found. Check your CSV files.")
+        else:
+            print("  ✅ Gender concepts verified.")
+
+    # Step 8: Drop staging tables
+    print(f"\n[STEP 8] Dropping staging tables…")
+    for _, stage_table, _ in TABLE_CONFIG:
+        psql(container, user, db,
+             f"DROP TABLE IF EXISTS {stage_table};",
+             f"DROP TABLE IF EXISTS {stage_table}")
+    print("  ✅ Staging tables dropped.")
 
     print("\n" + "=" * 60)
     print("  ✅  Gender vocabulary load complete!")

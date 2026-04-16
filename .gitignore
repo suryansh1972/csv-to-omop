@@ -19,3 +19,5 @@ vocabulary_download*/
 *.zipgit init
 git add .
 git commit -m "initial commit"
+OMOP Setup/config.json
+CommonDataModel/

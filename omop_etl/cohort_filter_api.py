@@ -11,6 +11,7 @@ Endpoints:
 """
 import logging
 import os
+import sys
 import tempfile
 import threading
 from datetime import datetime
@@ -22,10 +23,19 @@ from flask import Flask, jsonify, request, send_file, abort
 
 # Support running as a script (python omop_etl/cohort_filter_api.py)
 # or as a module (python -m omop_etl.cohort_filter_api).
+# If run as a script from repo root, ensure the repo root is on sys.path.
+_HERE = os.path.dirname(os.path.abspath(__file__))
+_REPO_ROOT = os.path.dirname(_HERE)
+if _REPO_ROOT not in sys.path:
+    sys.path.insert(0, _REPO_ROOT)
+
 try:
     from .duckdb_exporter import DuckDBExporter, PERSON_SCOPED_TABLES
 except Exception:
-    from duckdb_exporter import DuckDBExporter, PERSON_SCOPED_TABLES
+    try:
+        from omop_etl.duckdb_exporter import DuckDBExporter, PERSON_SCOPED_TABLES
+    except Exception:
+        from duckdb_exporter import DuckDBExporter, PERSON_SCOPED_TABLES
 
 # ---------------------------------------------------------------------------
 # Logging — set up FIRST so config-load messages appear
@@ -85,9 +95,17 @@ def _get_conn():
 OUTPUT_DIR = os.environ.get("OMOP_OUTPUT_DIR", tempfile.gettempdir())
 
 # ---------------------------------------------------------------------------
+# Server config
+# ---------------------------------------------------------------------------
+API_HOST = os.environ.get("OMOP_API_HOST", "0.0.0.0")
+try:
+    API_PORT = int(os.environ.get("OMOP_API_PORT", "5050"))
+except ValueError:
+    API_PORT = 5050
+
+# ---------------------------------------------------------------------------
 # HTML path — resolve relative to THIS file so it works from any cwd
 # ---------------------------------------------------------------------------
-_HERE    = os.path.dirname(os.path.abspath(__file__))
 UI_HTML  = os.path.join(_HERE, "cohort_filter.html")
 
 # ---------------------------------------------------------------------------
@@ -283,6 +301,60 @@ def _fetch_concept_relationships(
 
 
 # ---------------------------------------------------------------------------
+# Data-mapped concept helpers
+# ---------------------------------------------------------------------------
+
+# Maps each clinical table to its primary concept_id column.
+# Only the "main" concept column per table is used so that searches show
+# the concepts that drive clinical meaning (not type/source cols).
+_TABLE_PRIMARY_CONCEPT_COL: Dict[str, str] = {
+    "condition_occurrence":  "condition_concept_id",
+    "measurement":           "measurement_concept_id",
+    "observation":           "observation_concept_id",
+    "drug_exposure":         "drug_concept_id",
+    "procedure_occurrence":  "procedure_concept_id",
+    "device_exposure":       "device_concept_id",
+    "visit_occurrence":      "visit_concept_id",
+    "specimen":              "specimen_concept_id",
+    "death":                 "cause_concept_id",
+    "note":                  "note_type_concept_id",
+}
+
+
+def _build_data_concepts_cte(conn, schema: str) -> str:
+    """Build a SQL CTE that collects all distinct concept_ids from data tables.
+
+    Only tables that physically exist in the schema are included so the
+    query never fails on a partial deployment.
+    """
+    # Find which tables actually exist
+    cur = conn.cursor()
+    try:
+        cur.execute(
+            "SELECT table_name FROM information_schema.tables "
+            "WHERE table_schema = %s",
+            (schema,),
+        )
+        existing_tables = {r[0] for r in cur.fetchall()}
+    finally:
+        cur.close()
+
+    unions: List[str] = []
+    for table, col in _TABLE_PRIMARY_CONCEPT_COL.items():
+        if table in existing_tables:
+            unions.append(
+                f"SELECT DISTINCT {col} AS concept_id FROM {schema}.{table} "
+                f"WHERE {col} IS NOT NULL AND {col} > 0"
+            )
+
+    if not unions:
+        # Fallback: return an empty set so queries still parse
+        return "WITH data_concepts AS (SELECT NULL::int AS concept_id WHERE FALSE)"
+
+    return "WITH data_concepts AS (\n" + "\nUNION\n".join(unions) + "\n)"
+
+
+# ---------------------------------------------------------------------------
 # Core business logic
 # ---------------------------------------------------------------------------
 
@@ -428,6 +500,17 @@ def concept_lookup():
     try:
         conn    = _get_conn()
         concept = _resolve_concept(conn, DB_SCHEMA, concept_id)
+        if concept:
+            # Verify concept is present in at least one data table
+            cte = _build_data_concepts_cte(conn, DB_SCHEMA)
+            row = _fetch_one(
+                conn,
+                f"{cte} SELECT 1 FROM data_concepts WHERE concept_id = %s LIMIT 1",
+                (concept_id,),
+            )
+            if not row:
+                conn.close()
+                return jsonify({"error": f"Concept {concept_id} exists in vocabulary but is not present in your data"}), 404
         conn.close()
     except Exception as exc:
         logger.error(f"DB error in concept-lookup: {exc}")
@@ -449,18 +532,22 @@ def concept_search():
 
     try:
         conn = _get_conn()
+        cte  = _build_data_concepts_cte(conn, DB_SCHEMA)
         cur  = conn.cursor()
         cur.execute(
             f"""
-            SELECT concept_id, concept_name, domain_id, vocabulary_id, concept_class_id, standard_concept
-            FROM {DB_SCHEMA}.concept
-            WHERE invalid_reason IS NULL
-              AND concept_name ILIKE %s
+            {cte}
+            SELECT c.concept_id, c.concept_name, c.domain_id, c.vocabulary_id,
+                   c.concept_class_id, c.standard_concept
+            FROM {DB_SCHEMA}.concept c
+            INNER JOIN data_concepts dc ON dc.concept_id = c.concept_id
+            WHERE c.invalid_reason IS NULL
+              AND c.concept_name ILIKE %s
             ORDER BY
-              CASE WHEN lower(concept_name) = lower(%s) THEN 0 ELSE 1 END,
-              CASE WHEN standard_concept = 'S' THEN 0 ELSE 1 END,
-              length(concept_name) ASC,
-              concept_id ASC
+              CASE WHEN lower(c.concept_name) = lower(%s) THEN 0 ELSE 1 END,
+              CASE WHEN c.standard_concept = 'S' THEN 0 ELSE 1 END,
+              length(c.concept_name) ASC,
+              c.concept_id ASC
             LIMIT %s
             """,
             (f"%{query}%", query, limit),
@@ -551,10 +638,10 @@ if __name__ == "__main__":
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     logger.info("=" * 60)
     logger.info("OMOP Cohort Filter API")
-    logger.info(f"  UI  →  http://localhost:5050")
-    logger.info(f"  Ping → http://localhost:5050/api/ping  (DB health check)")
+    logger.info(f"  UI  →  http://localhost:{API_PORT}")
+    logger.info(f"  Ping → http://localhost:{API_PORT}/api/ping  (DB health check)")
     logger.info(f"  Schema : {DB_SCHEMA}")
     logger.info(f"  Output : {OUTPUT_DIR}")
     logger.info(f"  HTML   : {UI_HTML}  (exists={os.path.exists(UI_HTML)})")
     logger.info("=" * 60)
-    app.run(host="0.0.0.0", port=5050, debug=False, use_reloader=False)
+    app.run(host=API_HOST, port=API_PORT, debug=False, use_reloader=False)

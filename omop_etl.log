@@ -270,3 +270,185 @@
 2026-03-15 14:31:57,813 [INFO] pipeline:   Committed 14 visit_occurrence records
 2026-03-15 14:31:57,813 [INFO] pipeline: Pass 2: Writing clinical events...
 2026-03-15 14:33:17,923 [INFO] pipeline: ETL complete. Processed 14 source rows.
+2026-03-16 23:34:42,933 [INFO] core.profiler: Profiling dataset: SANSCOG_ClinicalAssessment_IUDXTestData (2).csv
+2026-03-16 23:34:42,946 [INFO] core.profiler: Loaded 161 mapped field names from nurse_v10_snomed_mapping.csv
+2026-03-16 23:34:42,951 [INFO] core.profiler: Loaded 1822 mapped field names from clinical_v10_snomed_mapping.csv
+2026-03-16 23:34:42,954 [INFO] core.profiler: Dataset: 1702 columns, 14 rows
+2026-03-16 23:34:43,335 [INFO] core.profiler: Profile complete: person_id=hmse0:note6, gender=None, age=intro_header1:age, date_cols=5, groups=192
+2026-03-16 23:34:45,322 [INFO] pipeline: Connected to localhost:5432/omop
+2026-03-16 23:34:45,356 [INFO] core.id_generator: ID generators initialized from database
+2026-03-16 23:34:45,356 [INFO] pipeline: Step 1/5: Profiling source CSV...
+2026-03-16 23:34:45,356 [INFO] core.profiler: Profiling dataset: SANSCOG_ClinicalAssessment_IUDXTestData (2).csv
+2026-03-16 23:34:45,367 [INFO] core.profiler: Loaded 161 mapped field names from nurse_v10_snomed_mapping.csv
+2026-03-16 23:34:45,373 [INFO] core.profiler: Loaded 1822 mapped field names from clinical_v10_snomed_mapping.csv
+2026-03-16 23:34:45,375 [INFO] core.profiler: Dataset: 1702 columns, 14 rows
+2026-03-16 23:34:46,172 [INFO] core.profiler: Profile complete: person_id=hmse0:note6, gender=intro_header1:gender, age=intro_header1:age, date_cols=5, groups=192
+2026-03-16 23:34:46,172 [INFO] pipeline: Step 2/5: Loading SNOMED mappings...
+2026-03-16 23:34:46,172 [INFO] core.concept_resolver: Mapping file nurse_v10_snomed_mapping.csv: name_col='name', snomed_col='snomed'
+2026-03-16 23:34:46,173 [INFO] core.concept_resolver: Parsed 161 field→SNOMED mappings from nurse_v10_snomed_mapping.csv
+2026-03-16 23:34:46,173 [INFO] core.concept_resolver: Mapping file clinical_v10_snomed_mapping.csv: name_col='name', snomed_col='snomed'
+2026-03-16 23:34:46,181 [INFO] core.concept_resolver: Parsed 1682 field→SNOMED mappings from clinical_v10_snomed_mapping.csv
+2026-03-16 23:34:46,181 [INFO] pipeline: Loaded 1822 field→SNOMED mappings
+2026-03-16 23:34:46,181 [INFO] pipeline: Step 3/5: Classifying columns to OMOP domains...
+2026-03-16 23:34:46,974 [INFO] core.domain_classifier: Classification: 501 SNOMED-mapped, condition_occurrence=56, drug_exposure=20, measurement=57, observation=366, procedure_occurrence=2, skip=1201
+2026-03-16 23:34:46,976 [INFO] pipeline: Step 4/5: Resolving type concept IDs from DB...
+2026-03-16 23:34:47,012 [INFO] pipeline: Type concepts resolved from DB: {'visit_type': 0, 'obs_type': 32817, 'meas_type': 0, 'cond_type': 0, 'drug_type': 0, 'obs_period_type': 0, 'visit_concept': 9202, 'cond_status': 32867}
+2026-03-16 23:34:47,012 [INFO] pipeline: Step 5/5: Two-pass ETL (persons+visits → then events)...
+2026-03-16 23:34:47,014 [INFO] pipeline: Loaded 14 source rows into memory
+2026-03-16 23:34:47,023 [INFO] pipeline: Detected source visit ordinal column: intro_header1:visits
+2026-03-16 23:34:47,023 [INFO] pipeline: Pass 1: Writing persons and visit_occurrence...
+2026-03-16 23:34:47,073 [INFO] pipeline:   Committed 14 person records
+2026-03-16 23:34:47,105 [INFO] pipeline:   Committed 14 visit_occurrence records
+2026-03-16 23:34:47,105 [INFO] pipeline: Pass 2: Writing clinical events...
+2026-03-16 23:35:45,310 [INFO] pipeline: ETL complete. Processed 14 source rows.
+2026-03-17 00:12:43,749 [INFO] core.profiler: Profiling dataset: SANSCOG_ClinicalAssessment_IUDXTestData (2).csv
+2026-03-17 00:12:43,765 [INFO] core.profiler: Loaded 161 mapped field names from nurse_v10_snomed_mapping.csv
+2026-03-17 00:12:43,771 [INFO] core.profiler: Loaded 1822 mapped field names from clinical_v10_snomed_mapping.csv
+2026-03-17 00:12:43,773 [INFO] core.profiler: Dataset: 1702 columns, 14 rows
+2026-03-17 00:12:44,162 [INFO] core.profiler: Profile complete: person_id=hmse0:note6, gender=None, age=intro_header1:age, date_cols=5, groups=192
+2026-03-17 00:12:45,511 [INFO] pipeline: Connected to localhost:5432/omop
+2026-03-17 00:12:45,541 [INFO] core.id_generator: ID generators initialized from database
+2026-03-17 00:12:45,541 [INFO] pipeline: Step 1/5: Profiling source CSV...
+2026-03-17 00:12:45,541 [INFO] core.profiler: Profiling dataset: SANSCOG_ClinicalAssessment_IUDXTestData (2).csv
+2026-03-17 00:12:45,552 [INFO] core.profiler: Loaded 161 mapped field names from nurse_v10_snomed_mapping.csv
+2026-03-17 00:12:45,557 [INFO] core.profiler: Loaded 1822 mapped field names from clinical_v10_snomed_mapping.csv
+2026-03-17 00:12:45,559 [INFO] core.profiler: Dataset: 1702 columns, 14 rows
+2026-03-17 00:12:46,380 [INFO] core.profiler: Profile complete: person_id=hmse0:note6, gender=intro_header1:gender, age=intro_header1:age, date_cols=5, groups=192
+2026-03-17 00:12:46,380 [INFO] pipeline: Step 2/5: Loading SNOMED mappings...
+2026-03-17 00:12:46,380 [INFO] core.concept_resolver: Mapping file nurse_v10_snomed_mapping.csv: name_col='name', snomed_col='snomed'
+2026-03-17 00:12:46,381 [INFO] core.concept_resolver: Parsed 161 field→SNOMED mappings from nurse_v10_snomed_mapping.csv
+2026-03-17 00:12:46,381 [INFO] core.concept_resolver: Mapping file clinical_v10_snomed_mapping.csv: name_col='name', snomed_col='snomed'
+2026-03-17 00:12:46,389 [INFO] core.concept_resolver: Parsed 1682 field→SNOMED mappings from clinical_v10_snomed_mapping.csv
+2026-03-17 00:12:46,389 [INFO] pipeline: Loaded 1822 field→SNOMED mappings
+2026-03-17 00:12:46,389 [INFO] pipeline: Step 3/5: Classifying columns to OMOP domains...
+2026-03-17 00:12:46,867 [INFO] core.domain_classifier: Classification: 475 SNOMED-mapped, condition_occurrence=33, drug_exposure=18, measurement=57, observation=366, procedure_occurrence=1, skip=1227
+2026-03-17 00:12:46,867 [INFO] pipeline: Step 4/5: Resolving type concept IDs from DB...
+2026-03-17 00:12:46,903 [INFO] pipeline: Type concepts resolved from DB: {'visit_type': 0, 'obs_type': 32817, 'meas_type': 0, 'cond_type': 0, 'drug_type': 0, 'obs_period_type': 0, 'visit_concept': 9202, 'cond_status': 32867}
+2026-03-17 00:12:46,903 [INFO] pipeline: Step 5/5: Two-pass ETL (persons+visits → then events)...
+2026-03-17 00:12:46,907 [INFO] pipeline: Loaded 14 source rows into memory
+2026-03-17 00:12:46,915 [INFO] pipeline: Detected source visit ordinal column: intro_header1:visits
+2026-03-17 00:12:46,915 [INFO] pipeline: Pass 1: Writing persons and visit_occurrence...
+2026-03-17 00:12:46,965 [INFO] pipeline:   Committed 14 person records
+2026-03-17 00:12:46,997 [INFO] pipeline:   Committed 14 visit_occurrence records
+2026-03-17 00:12:46,997 [INFO] pipeline: Pass 2: Writing clinical events...
+2026-03-17 00:13:45,986 [INFO] pipeline: ETL complete. Processed 14 source rows.
+2026-03-17 00:26:51,817 [INFO] core.profiler: Profiling dataset: SANSCOG_ClinicalAssessment_IUDXTestData (2).csv
+2026-03-17 00:26:51,831 [INFO] core.profiler: Loaded 161 mapped field names from nurse_v10_snomed_mapping.csv
+2026-03-17 00:26:51,836 [INFO] core.profiler: Loaded 1822 mapped field names from clinical_v10_snomed_mapping.csv
+2026-03-17 00:26:51,839 [INFO] core.profiler: Dataset: 1702 columns, 14 rows
+2026-03-17 00:26:52,234 [INFO] core.profiler: Profile complete: person_id=hmse0:note6, gender=None, age=intro_header1:age, date_cols=5, groups=192
+2026-03-17 00:26:53,447 [INFO] pipeline: Connected to localhost:5432/omop
+2026-03-17 00:26:53,474 [INFO] core.id_generator: ID generators initialized from database
+2026-03-17 00:26:53,474 [INFO] pipeline: Step 1/5: Profiling source CSV...
+2026-03-17 00:26:53,474 [INFO] core.profiler: Profiling dataset: SANSCOG_ClinicalAssessment_IUDXTestData (2).csv
+2026-03-17 00:26:53,488 [INFO] core.profiler: Loaded 161 mapped field names from nurse_v10_snomed_mapping.csv
+2026-03-17 00:26:53,493 [INFO] core.profiler: Loaded 1822 mapped field names from clinical_v10_snomed_mapping.csv
+2026-03-17 00:26:53,496 [INFO] core.profiler: Dataset: 1702 columns, 14 rows
+2026-03-17 00:26:54,284 [INFO] core.profiler: Profile complete: person_id=hmse0:note6, gender=intro_header1:gender, age=intro_header1:age, date_cols=5, groups=192
+2026-03-17 00:26:54,285 [INFO] pipeline: Step 2/5: Loading SNOMED mappings...
+2026-03-17 00:26:54,285 [INFO] core.concept_resolver: Mapping file nurse_v10_snomed_mapping.csv: name_col='name', snomed_col='snomed'
+2026-03-17 00:26:54,286 [INFO] core.concept_resolver: Parsed 161 field→SNOMED mappings from nurse_v10_snomed_mapping.csv
+2026-03-17 00:26:54,286 [INFO] core.concept_resolver: Mapping file clinical_v10_snomed_mapping.csv: name_col='name', snomed_col='snomed'
+2026-03-17 00:26:54,294 [INFO] core.concept_resolver: Parsed 1682 field→SNOMED mappings from clinical_v10_snomed_mapping.csv
+2026-03-17 00:26:54,294 [INFO] pipeline: Loaded 1822 field→SNOMED mappings
+2026-03-17 00:26:54,294 [INFO] pipeline: Step 3/5: Classifying columns to OMOP domains...
+2026-03-17 00:26:54,801 [INFO] core.domain_classifier: Classification: 475 SNOMED-mapped, condition_occurrence=33, drug_exposure=18, measurement=57, observation=366, procedure_occurrence=1, skip=1227
+2026-03-17 00:26:54,802 [INFO] pipeline: Step 4/5: Resolving type concept IDs from DB...
+2026-03-17 00:26:54,820 [INFO] pipeline: Type concepts resolved from DB: {'visit_type': 0, 'obs_type': 32817, 'meas_type': 44818702, 'cond_type': 32020, 'drug_type': 38000177, 'obs_period_type': 44814723, 'visit_concept': 9202, 'cond_status': 32867}
+2026-03-17 00:26:54,820 [INFO] pipeline: Step 5/5: Two-pass ETL (persons+visits → then events)...
+2026-03-17 00:26:54,822 [INFO] pipeline: Loaded 14 source rows into memory
+2026-03-17 00:26:54,827 [INFO] pipeline: Detected source visit ordinal column: intro_header1:visits
+2026-03-17 00:26:54,827 [INFO] pipeline: Pass 1: Writing persons and visit_occurrence...
+2026-03-17 00:26:54,875 [INFO] pipeline:   Committed 14 person records
+2026-03-17 00:26:54,906 [INFO] pipeline:   Committed 14 visit_occurrence records
+2026-03-17 00:26:54,906 [INFO] pipeline: Pass 2: Writing clinical events...
+2026-03-17 00:27:01,191 [INFO] pipeline: ETL complete. Processed 14 source rows.
+2026-03-17 00:48:30,543 [INFO] core.profiler: Profiling dataset: SANSCOG_ClinicalAssessment_IUDXTestData (2).csv
+2026-03-17 00:48:30,559 [INFO] core.profiler: Loaded 161 mapped field names from nurse_v10_snomed_mapping.csv
+2026-03-17 00:48:30,564 [INFO] core.profiler: Loaded 1822 mapped field names from clinical_v10_snomed_mapping.csv
+2026-03-17 00:48:30,567 [INFO] core.profiler: Dataset: 1702 columns, 14 rows
+2026-03-17 00:48:30,957 [INFO] core.profiler: Profile complete: person_id=hmse0:note6, gender=None, age=intro_header1:age, date_cols=5, groups=192
+2026-03-17 00:48:32,075 [INFO] pipeline: Connected to localhost:5432/omop
+2026-03-17 00:48:32,113 [INFO] core.id_generator: ID generators initialized from database
+2026-03-17 00:48:32,113 [INFO] pipeline: Step 1/5: Profiling source CSV...
+2026-03-17 00:48:32,113 [INFO] core.profiler: Profiling dataset: SANSCOG_ClinicalAssessment_IUDXTestData (2).csv
+2026-03-17 00:48:32,129 [INFO] core.profiler: Loaded 161 mapped field names from nurse_v10_snomed_mapping.csv
+2026-03-17 00:48:32,134 [INFO] core.profiler: Loaded 1822 mapped field names from clinical_v10_snomed_mapping.csv
+2026-03-17 00:48:32,137 [INFO] core.profiler: Dataset: 1702 columns, 14 rows
+2026-03-17 00:48:32,946 [INFO] core.profiler: Profile complete: person_id=hmse0:note6, gender=intro_header1:gender, age=intro_header1:age, date_cols=5, groups=192
+2026-03-17 00:48:32,946 [INFO] pipeline: Step 2/5: Loading SNOMED mappings...
+2026-03-17 00:48:32,946 [INFO] core.concept_resolver: Mapping file nurse_v10_snomed_mapping.csv: name_col='name', snomed_col='snomed'
+2026-03-17 00:48:32,947 [INFO] core.concept_resolver: Parsed 161 field→SNOMED mappings from nurse_v10_snomed_mapping.csv
+2026-03-17 00:48:32,947 [INFO] core.concept_resolver: Mapping file clinical_v10_snomed_mapping.csv: name_col='name', snomed_col='snomed'
+2026-03-17 00:48:32,956 [INFO] core.concept_resolver: Parsed 1682 field→SNOMED mappings from clinical_v10_snomed_mapping.csv
+2026-03-17 00:48:32,956 [INFO] pipeline: Loaded 1822 field→SNOMED mappings
+2026-03-17 00:48:32,956 [INFO] pipeline: Step 3/5: Classifying columns to OMOP domains...
+2026-03-17 00:48:33,465 [INFO] core.domain_classifier: Classification: 475 SNOMED-mapped, condition_occurrence=33, drug_exposure=18, measurement=59, observation=364, procedure_occurrence=1, skip=1227
+2026-03-17 00:48:33,467 [INFO] pipeline: Step 4/5: Resolving type concept IDs from DB...
+2026-03-17 00:48:33,488 [INFO] pipeline: Type concepts resolved from DB: {'visit_type': 0, 'obs_type': 32817, 'meas_type': 44818702, 'cond_type': 32020, 'drug_type': 38000177, 'obs_period_type': 44814723, 'visit_concept': 9202, 'cond_status': 32867}
+2026-03-17 00:48:33,488 [INFO] pipeline: Step 5/5: Two-pass ETL (persons+visits → then events)...
+2026-03-17 00:48:33,490 [INFO] pipeline: Loaded 14 source rows into memory
+2026-03-17 00:48:33,495 [INFO] pipeline: Detected source visit ordinal column: intro_header1:visits
+2026-03-17 00:48:33,495 [INFO] pipeline: Pass 1: Writing persons and visit_occurrence...
+2026-03-17 00:48:33,544 [INFO] pipeline:   Committed 14 person records
+2026-03-17 00:48:33,576 [INFO] pipeline:   Committed 14 visit_occurrence records
+2026-03-17 00:48:33,576 [INFO] pipeline: Pass 2: Writing clinical events...
+2026-03-17 00:48:39,948 [INFO] pipeline: ETL complete. Processed 14 source rows.
+2026-03-17 01:01:44,547 [INFO] core.profiler: Profiling dataset: SANSCOG_ClinicalAssessment_IUDXTestData (2).csv
+2026-03-17 01:01:44,561 [INFO] core.profiler: Loaded 161 mapped field names from nurse_v10_snomed_mapping.csv
+2026-03-17 01:01:44,566 [INFO] core.profiler: Loaded 1822 mapped field names from clinical_v10_snomed_mapping.csv
+2026-03-17 01:01:44,569 [INFO] core.profiler: Dataset: 1702 columns, 14 rows
+2026-03-17 01:01:44,994 [INFO] core.profiler: Profile complete: person_id=hmse0:note6, gender=None, age=intro_header1:age, date_cols=5, groups=192
+2026-03-17 01:01:45,863 [INFO] pipeline: Connected to localhost:5432/omop
+2026-03-17 01:01:45,890 [INFO] core.id_generator: ID generators initialized from database
+2026-03-17 01:01:45,890 [INFO] pipeline: Step 1/5: Profiling source CSV...
+2026-03-17 01:01:45,890 [INFO] core.profiler: Profiling dataset: SANSCOG_ClinicalAssessment_IUDXTestData (2).csv
+2026-03-17 01:01:45,904 [INFO] core.profiler: Loaded 161 mapped field names from nurse_v10_snomed_mapping.csv
+2026-03-17 01:01:45,909 [INFO] core.profiler: Loaded 1822 mapped field names from clinical_v10_snomed_mapping.csv
+2026-03-17 01:01:45,912 [INFO] core.profiler: Dataset: 1702 columns, 14 rows
+2026-03-17 01:01:46,698 [INFO] core.profiler: Profile complete: person_id=hmse0:note6, gender=intro_header1:gender, age=intro_header1:age, date_cols=5, groups=192
+2026-03-17 01:01:46,699 [INFO] pipeline: Step 2/5: Loading SNOMED mappings...
+2026-03-17 01:01:46,699 [INFO] core.concept_resolver: Mapping file nurse_v10_snomed_mapping.csv: name_col='name', snomed_col='snomed'
+2026-03-17 01:01:46,700 [INFO] core.concept_resolver: Parsed 161 field→SNOMED mappings from nurse_v10_snomed_mapping.csv
+2026-03-17 01:01:46,700 [INFO] core.concept_resolver: Mapping file clinical_v10_snomed_mapping.csv: name_col='name', snomed_col='snomed'
+2026-03-17 01:01:46,709 [INFO] core.concept_resolver: Parsed 1682 field→SNOMED mappings from clinical_v10_snomed_mapping.csv
+2026-03-17 01:01:46,709 [INFO] pipeline: Loaded 1822 field→SNOMED mappings
+2026-03-17 01:01:46,709 [INFO] pipeline: Step 3/5: Classifying columns to OMOP domains...
+2026-03-17 01:01:47,130 [INFO] core.domain_classifier: Classification: 475 SNOMED-mapped, condition_occurrence=33, drug_exposure=18, measurement=59, observation=364, procedure_occurrence=1, skip=1227
+2026-03-17 01:01:47,130 [INFO] pipeline: Step 4/5: Resolving type concept IDs from DB...
+2026-03-17 01:01:47,149 [INFO] pipeline: Type concepts resolved from DB: {'visit_type': 0, 'obs_type': 32817, 'meas_type': 44818702, 'cond_type': 32020, 'drug_type': 38000177, 'obs_period_type': 44814723, 'visit_concept': 9202, 'cond_status': 32867}
+2026-03-17 01:01:47,149 [INFO] pipeline: Step 5/5: Two-pass ETL (persons+visits → then events)...
+2026-03-17 01:01:47,151 [INFO] pipeline: Loaded 14 source rows into memory
+2026-03-17 01:01:47,156 [INFO] pipeline: Detected source visit ordinal column: intro_header1:visits
+2026-03-17 01:01:47,156 [INFO] pipeline: Pass 1: Writing persons and visit_occurrence...
+2026-03-17 01:01:47,202 [INFO] pipeline:   Committed 14 person records
+2026-03-17 01:01:47,265 [INFO] pipeline:   Committed 14 visit_occurrence records
+2026-03-17 01:01:47,266 [INFO] pipeline: Pass 2: Writing clinical events...
+2026-03-17 01:01:53,557 [INFO] pipeline: ETL complete. Processed 14 source rows.
+2026-04-05 16:52:37,442 [INFO] core.profiler: Profiling dataset: /Users/suryanshshivaprasad/Documents/OMOP/CsV to OMOP/omop_etl/SANSCOG_ClinicalAssessment_IUDXTestData (2).csv
+2026-04-05 16:52:37,449 [INFO] core.profiler: Loaded 1682 mapped field names from /Users/suryanshshivaprasad/Documents/OMOP/CsV to OMOP/data/sanscog/clinical_v10_snomed_mapping.csv
+2026-04-05 16:52:37,452 [INFO] core.profiler: Dataset: 1702 columns, 14 rows
+2026-04-05 16:52:37,806 [INFO] core.profiler: Profile complete: person_id=hmse0:note6, gender=None, age=intro_header1:age, date_cols=5, groups=192
+2026-04-05 16:52:41,258 [INFO] pipeline: Connected to localhost:5432/omop
+2026-04-05 16:52:41,321 [INFO] core.id_generator: ID generators initialized from database
+2026-04-05 16:52:41,321 [INFO] pipeline: Step 1/5: Profiling source CSV...
+2026-04-05 16:52:41,321 [INFO] core.profiler: Profiling dataset: /Users/suryanshshivaprasad/Documents/OMOP/CsV to OMOP/omop_etl/SANSCOG_ClinicalAssessment_IUDXTestData (2).csv
+2026-04-05 16:52:41,325 [INFO] core.profiler: Loaded 1682 mapped field names from /Users/suryanshshivaprasad/Documents/OMOP/CsV to OMOP/data/sanscog/clinical_v10_snomed_mapping.csv
+2026-04-05 16:52:41,327 [INFO] core.profiler: Dataset: 1702 columns, 14 rows
+2026-04-05 16:52:42,290 [INFO] core.profiler: Profile complete: person_id=hmse0:note6, gender=intro_header1:gender, age=intro_header1:age, date_cols=5, groups=192
+2026-04-05 16:52:42,291 [INFO] pipeline: Step 2/5: Loading SNOMED mappings...
+2026-04-05 16:52:42,292 [INFO] core.concept_resolver: Mapping file /Users/suryanshshivaprasad/Documents/OMOP/CsV to OMOP/data/sanscog/clinical_v10_snomed_mapping.csv: name_col='name', snomed_col='snomed'
+2026-04-05 16:52:42,304 [INFO] core.concept_resolver: Parsed 1682 field→SNOMED mappings from /Users/suryanshshivaprasad/Documents/OMOP/CsV to OMOP/data/sanscog/clinical_v10_snomed_mapping.csv
+2026-04-05 16:52:42,304 [INFO] pipeline: Loaded 1682 field→SNOMED mappings
+2026-04-05 16:52:42,304 [INFO] pipeline: Step 3/5: Classifying columns to OMOP domains...
+2026-04-05 16:52:42,802 [INFO] core.domain_classifier: Classification: 481 SNOMED-mapped, condition_occurrence=49, drug_exposure=18, measurement=59, observation=353, procedure_occurrence=2, skip=1221
+2026-04-05 16:52:42,803 [INFO] pipeline: Step 4/5: Resolving type concept IDs from DB...
+2026-04-05 16:52:42,854 [INFO] pipeline: Type concepts resolved from DB: {'visit_type': 0, 'obs_type': 32817, 'meas_type': 44818702, 'cond_type': 32020, 'drug_type': 38000177, 'obs_period_type': 44814723, 'visit_concept': 9202, 'cond_status': 32867}
+2026-04-05 16:52:42,854 [INFO] pipeline: Step 5/5: Two-pass ETL (persons+visits → then events)...
+2026-04-05 16:52:42,860 [INFO] pipeline: Loaded 14 source rows into memory
+2026-04-05 16:52:42,866 [INFO] pipeline: Detected source visit ordinal column: intro_header1:visits
+2026-04-05 16:52:42,866 [INFO] pipeline: Pass 1: Writing persons and visit_occurrence...
+2026-04-05 16:52:42,927 [INFO] pipeline:   Committed 14 person records
+2026-04-05 16:52:42,960 [INFO] pipeline:   Committed 14 visit_occurrence records
+2026-04-05 16:52:42,960 [INFO] pipeline: Pass 2: Writing clinical events...
+2026-04-05 16:52:49,745 [INFO] pipeline: ETL complete. Processed 14 source rows.

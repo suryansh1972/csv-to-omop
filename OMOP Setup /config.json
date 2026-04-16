@@ -2,14 +2,15 @@
   "postgres": {
     "container_name": "omop-postgres",
     "user": "postgres",
+    "password": "omop",
     "database": "omop"
   },
   "paths": {
     "ddl_local": "/Users/suryanshshivaprasad/Documents/OMOP/CommonDataModel/inst/ddl/5.4/postgresql",
     "ddl_container": "/omop_ddl",
-    "vocabulary_local": "/Users/suryanshshivaprasad/Documents/OMOP/CsV to OMOP/vocabulary_download_v5_{c622e6c4-8d47-4fe9-967f-36bff11d22eb}_1772460435126",
+    "vocabulary_local": "/Users/suryanshshivaprasad/Documents/OMOP/CsV to OMOP/data/vocabularies/snomed",
     "vocabulary_container": "/vocabulary",
-    "gender_vocab_local": "/Users/suryanshshivaprasad/Documents/OMOP/CsV to OMOP/gender_vocabulary",
+    "gender_vocab_local": "/Users/suryanshshivaprasad/Documents/OMOP/CsV to OMOP/data/vocabularies/gender",
     "gender_vocab_container": "/gender_vocabulary"
   },
   "ddl_files": [
