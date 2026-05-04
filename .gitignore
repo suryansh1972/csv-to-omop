@@ -1,0 +1,7 @@
+data/
+gender vocab/
+vocabulary_download_v5_*/
+*.csv
+*.zip
+__pycache__/
+CommonDataModel/
